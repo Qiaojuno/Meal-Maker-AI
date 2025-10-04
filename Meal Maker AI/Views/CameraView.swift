@@ -153,9 +153,8 @@ struct CameraView: View {
 
     // MARK: - Actions
 
-    private func handleImageSelected() {
-        guard let image = viewModel.capturedImage else { return }
-
+    private func handleImageSelected(_ image: UIImage) {
+        // Process the image directly (don't rely on binding timing)
         Task {
             await viewModel.processImage(image)
         }
@@ -170,7 +169,7 @@ struct CameraView: View {
 
 struct PhotoPicker: UIViewControllerRepresentable {
     @Binding var image: UIImage?
-    var onImageSelected: () -> Void
+    var onImageSelected: (UIImage) -> Void
 
     func makeUIViewController(context: Context) -> PHPickerViewController {
         var config = PHPickerConfiguration()
@@ -203,8 +202,10 @@ struct PhotoPicker: UIViewControllerRepresentable {
             if provider.canLoadObject(ofClass: UIImage.self) {
                 provider.loadObject(ofClass: UIImage.self) { image, _ in
                     DispatchQueue.main.async {
-                        self.parent.image = image as? UIImage
-                        self.parent.onImageSelected()
+                        if let uiImage = image as? UIImage {
+                            self.parent.image = uiImage
+                            self.parent.onImageSelected(uiImage)  // Pass image directly
+                        }
                     }
                 }
             }
@@ -217,7 +218,7 @@ struct PhotoPicker: UIViewControllerRepresentable {
 struct CameraCapture: UIViewControllerRepresentable {
     @Environment(\.dismiss) var dismiss
     @Binding var image: UIImage?
-    var onImageCaptured: () -> Void
+    var onImageCaptured: (UIImage) -> Void
 
     func makeUIViewController(context: Context) -> UIImagePickerController {
         let picker = UIImagePickerController()
@@ -242,7 +243,7 @@ struct CameraCapture: UIViewControllerRepresentable {
         func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
             if let image = info[.originalImage] as? UIImage {
                 parent.image = image
-                parent.onImageCaptured()
+                parent.onImageCaptured(image)  // Pass image directly
             }
             parent.dismiss()
         }

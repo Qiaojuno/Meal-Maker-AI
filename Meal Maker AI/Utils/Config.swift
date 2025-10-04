@@ -7,24 +7,34 @@
 
 import Foundation
 
+// ⚠️ SECURITY WARNING - HACKATHON MVP ONLY ⚠️
+//
+// This file contains a hardcoded API key for demonstration purposes ONLY.
+//
+// ❌ DO NOT USE IN PRODUCTION
+// ❌ DO NOT PUBLISH TO APP STORE
+// ❌ DO NOT SHARE THIS CODE PUBLICLY WITH THE KEY
+//
+// TODO: Before production deployment:
+// 1. Remove hardcoded API key from this file
+// 2. Implement backend proxy server (Node.js/Python/Go)
+// 3. Move API key to backend environment variables
+// 4. Update GeminiService to call YOUR backend, not Gemini directly
+// 5. Backend should validate requests and rate-limit per user
+//
+// Example backend architecture:
+// iOS App → https://your-backend.com/api/identify-ingredients → Gemini API
+//          (no API key)                                      (key secure on server)
+
 enum Config {
-    /// Gemini API Key from .env file
+    /// Gemini API Key - HACKATHON DEMO ONLY
+    ///
+    /// ⚠️ THIS IS INSECURE - Anyone can decompile the app and extract this key
+    /// ⚠️ TODO: Move to secure backend before production deployment
     static var geminiAPIKey: String {
-        // First try to read from .env file in bundle
-        if let path = Bundle.main.path(forResource: ".env", ofType: nil),
-           let content = try? String(contentsOfFile: path),
-           let key = parseEnvFile(content)["GEMINI_API_KEY"], !key.isEmpty {
-            return key
-        }
-
-        // Fallback: Check Info.plist (for production builds)
-        if let key = Bundle.main.object(forInfoDictionaryKey: "GEMINI_API_KEY") as? String, !key.isEmpty {
-            return key
-        }
-
-        // Development fallback: Return placeholder
-        // This allows app to compile but will fail at runtime if key not set
-        return "YOUR_GEMINI_API_KEY_HERE"
+        // HACKATHON ONLY: Hardcoded API key
+        // TODO: Replace with backend API call before production
+        return "AIzaSyD3K3llXHluUU0UEeHuRoDsBvVbNuCJKrM"
     }
 
     /// Check if Gemini API key is configured

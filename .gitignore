@@ -23,6 +23,9 @@ DerivedData/
 .env
 */.env
 Resources/.env
+gemini.env
+*/gemini.env
+Resources/gemini.env
 
 # Swift Package Manager
 .build/

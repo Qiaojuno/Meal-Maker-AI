@@ -1,7 +1,17 @@
 # 🍽️ FridgeScanner - AI Meal Planner
 
 **24-Hour Hackathon MVP**
-**Status**: ✅ Code Complete | ⚠️ 1 Build Issue Remaining
+**Status**: ✅ Complete & Running on Device
+
+## ⚠️ SECURITY NOTICE
+
+**This is a hackathon demo with a hardcoded API key.**
+
+- 🔴 **NOT production-ready**
+- 🔴 **DO NOT publish to App Store**
+- 🔴 **DO NOT distribute publicly**
+
+See **[SECURITY.md](SECURITY.md)** for migration guide to production-ready backend.
 
 ---
 
@@ -17,31 +27,9 @@ iOS app that scans your fridge and generates recipes using AI.
 
 ---
 
-## ⚠️ CURRENT ISSUE
-
-**Build Error**: `Undefined symbols: "_main"`
-
-**Quick Fix**:
-```bash
-# 1. Close Xcode (Cmd + Q)
-
-# 2. Clean Derived Data
-rm -rf ~/Library/Developer/Xcode/DerivedData/Meal_Maker_AI-*
-
-# 3. Reopen
-open "Meal Maker AI.xcodeproj"
-
-# 4. Clean & Build in Xcode
-Shift + Cmd + K
-Cmd + B
-```
-
-**Why**: App entry file (`Meal_Maker_AIApp.swift`) was recreated after accidental deletion. Xcode needs to re-index.
-
----
-
 ## 📚 Documentation
 
+- **[SECURITY.md](SECURITY.md)** - ⚠️ **READ THIS FIRST** - Security considerations and production migration
 - **[COMPLETE_SETUP_GUIDE.md](Meal%20Maker%20AI/COMPLETE_SETUP_GUIDE.md)** - Full setup instructions, troubleshooting
 - **[CHANGES_LOG.md](CHANGES_LOG.md)** - All changes made this session
 - **[ARCHITECTURE.md](Meal%20Maker%20AI/ARCHITECTURE.md)** - Original architecture plan
@@ -64,21 +52,22 @@ Cmd + B
 
 ## 🚀 Quick Start
 
-1. **Fix build error** (see above)
-2. **Connect iPhone** (camera needs real device)
-3. **Run** (Cmd + R)
-4. **Grant permissions** (camera, photos)
-5. **Take photo of fridge**
-6. **Get recipes!**
+1. **Connect iPhone** (camera needs real device)
+2. **Run** (Cmd + R)
+3. **Grant permissions** (camera, photos)
+4. **Take photo of fridge**
+5. **Get recipes!**
 
 ---
 
-## 🔑 API Key
+## 🔑 API Configuration
 
-Configured in `Meal Maker AI/Resources/.env`:
-```
-GEMINI_API_KEY=AIzaSyD3K3llXHluUU0UEeHuRoDsBvVbNuCJKrM
-```
+⚠️ **Hackathon Demo Only**: API key is hardcoded in `Config.swift` for demo purposes.
+
+**Production Migration Required:**
+- See [SECURITY.md](SECURITY.md) for backend proxy setup
+- Estimated time: 1-1.5 hours
+- Options: Node.js, Python, or Firebase Cloud Functions
 
 ---
 
@@ -100,13 +89,9 @@ GEMINI_API_KEY=AIzaSyD3K3llXHluUU0UEeHuRoDsBvVbNuCJKrM
 | Code | ✅ Complete |
 | API Config | ✅ Done |
 | Navigation | ✅ Working |
-| Build | ⚠️ Needs fix |
-| Testing | ⏳ Pending |
+| Build | ✅ Working |
+| Device Testing | ✅ Running on iPhone |
 
 ---
 
-**Confidence**: 9/10
-
-**Need Help?** Check `COMPLETE_SETUP_GUIDE.md`
-
-**YARRR! 🏴‍☠️**
+**YARRR! 🏴‍☠️** Hackathon MVP Complete!
