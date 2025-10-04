@@ -131,7 +131,14 @@ struct CameraView: View {
                 .fontWeight(.bold)
                 .foregroundColor(.white)
 
-            Button(action: proceedToIngredients) {
+            Button {
+                // Fix: Use DispatchQueue to ensure state is fully propagated
+                // This prevents race condition where button click happens
+                // before @Published property updates the view
+                DispatchQueue.main.async {
+                    proceedToIngredients()
+                }
+            } label: {
                 Text("Review Ingredients")
                     .font(.headline)
                     .foregroundColor(.black)
