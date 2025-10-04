@@ -116,7 +116,9 @@ struct HomeTabView: View {
     var body: some View {
         NavigationStack(path: $navigationPath) {
             CameraView { ingredients in
+                print("🔍 DEBUG: HomeTabView received \(ingredients.count) ingredients")
                 identifiedIngredients = ingredients
+                print("🔍 DEBUG: Navigating to ingredient list")
                 navigationPath.append(NavigationDestination.ingredientList)
             }
             .navigationTitle("FridgeScanner")
@@ -124,14 +126,17 @@ struct HomeTabView: View {
             .navigationDestination(for: NavigationDestination.self) { destination in
                 switch destination {
                 case .ingredientList:
+                    let _ = print("🔍 DEBUG: Creating IngredientListView with \(identifiedIngredients.count) ingredients")
                     IngredientListView(
                         ingredients: identifiedIngredients,
                         onConfirm: { confirmedIngredients in
+                            print("🔍 DEBUG: User confirmed \(confirmedIngredients.count) ingredients")
                             identifiedIngredients = confirmedIngredients
                             navigationPath.append(NavigationDestination.recipeGeneration)
                         },
                         onRescan: {
-                            navigationPath.removeLast()
+                            print("🔍 DEBUG: User requested rescan")
+                            navigationPath.removeLast()  // Go back to camera
                         }
                     )
 

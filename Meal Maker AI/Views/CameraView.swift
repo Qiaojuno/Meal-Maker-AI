@@ -161,6 +161,10 @@ struct CameraView: View {
     }
 
     private func proceedToIngredients() {
+        print("🔍 DEBUG: Proceeding with \(viewModel.identifiedIngredients.count) ingredients")
+        viewModel.identifiedIngredients.forEach { ingredient in
+            print("  - \(ingredient.name) (\(ingredient.quantity ?? "no quantity"))")
+        }
         onIngredientsIdentified?(viewModel.identifiedIngredients)
     }
 }

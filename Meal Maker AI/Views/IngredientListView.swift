@@ -35,6 +35,12 @@ struct IngredientListView: View {
         .sheet(isPresented: $showingAddIngredient) {
             addIngredientSheet
         }
+        .onAppear {
+            print("🔍 DEBUG: IngredientListView appeared with \(ingredients.count) ingredients")
+            ingredients.forEach { ingredient in
+                print("  - \(ingredient.name)")
+            }
+        }
     }
 
     // MARK: - Subviews
