@@ -12,8 +12,8 @@ import Foundation
 class GeminiService {
     // API Configuration
     private let baseURL = "https://generativelanguage.googleapis.com/v1beta/models"
-    private let visionModel = "gemini-1.5-flash"  // Supports images
-    private let textModel = "gemini-1.5-flash"    // Text only, faster
+    private let visionModel = "gemini-2.5-flash"  // Supports images (multimodal)
+    private let textModel = "gemini-2.5-flash"    // Text only, faster
     private let maxIngredients = 12
 
     private var apiKey: String {

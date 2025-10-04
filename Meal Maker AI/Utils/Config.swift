@@ -8,9 +8,16 @@
 import Foundation
 
 enum Config {
-    /// Gemini API Key from .env file
+    /// Gemini API Key from gemini.env file
     static var geminiAPIKey: String {
-        // First try to read from .env file in bundle
+        // First try to read from gemini.env file in bundle
+        if let path = Bundle.main.path(forResource: "gemini", ofType: "env"),
+           let content = try? String(contentsOfFile: path),
+           let key = parseEnvFile(content)["GEMINI_API_KEY"], !key.isEmpty {
+            return key
+        }
+
+        // Fallback: Try old .env filename (for backwards compatibility)
         if let path = Bundle.main.path(forResource: ".env", ofType: nil),
            let content = try? String(contentsOfFile: path),
            let key = parseEnvFile(content)["GEMINI_API_KEY"], !key.isEmpty {
