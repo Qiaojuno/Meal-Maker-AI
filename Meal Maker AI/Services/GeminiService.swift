@@ -8,7 +8,22 @@
 import UIKit
 import Foundation
 
+// ⚠️ SECURITY WARNING - HACKATHON MVP ONLY ⚠️
+//
+// This service calls Google Gemini API directly from the iOS app.
+// The API key is hardcoded in Config.swift for demo purposes.
+//
+// TODO: Before production:
+// 1. Create backend API (Node.js/Python/Go)
+// 2. Replace these functions to call YOUR backend instead of Gemini directly
+// 3. Backend endpoints should be:
+//    - POST /api/identify-ingredients (accepts image, returns ingredients JSON)
+//    - POST /api/generate-recipes (accepts ingredients, returns recipes JSON)
+// 4. Move all Gemini API logic to backend
+// 5. Implement rate limiting and authentication on backend
+
 /// Service for interacting with Google Gemini API
+/// ⚠️ HACKATHON DEMO ONLY - Requires backend proxy for production
 class GeminiService {
     // API Configuration
     private let baseURL = "https://generativelanguage.googleapis.com/v1beta/models"
