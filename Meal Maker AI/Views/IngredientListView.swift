@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct IngredientListView: View {
-    @State var ingredients: [Ingredient]
+    @State private var ingredients: [Ingredient]
     @State private var showingAddIngredient = false
     @State private var newIngredientName = ""
     @State private var newIngredientQuantity = ""
@@ -16,6 +16,18 @@ struct IngredientListView: View {
     // Callback when user confirms ingredients
     var onConfirm: (([Ingredient]) -> Void)?
     var onRescan: (() -> Void)?
+
+    // CRITICAL FIX: Proper initializer for @State with external parameter
+    init(
+        ingredients: [Ingredient],
+        onConfirm: (([Ingredient]) -> Void)? = nil,
+        onRescan: (() -> Void)? = nil
+    ) {
+        // Use _ingredients to set the @State wrapper's initial value
+        self._ingredients = State(initialValue: ingredients)
+        self.onConfirm = onConfirm
+        self.onRescan = onRescan
+    }
 
     var body: some View {
         VStack(spacing: 0) {
