@@ -23,8 +23,13 @@ struct IngredientListView: View {
         onConfirm: (([Ingredient]) -> Void)? = nil,
         onRescan: (() -> Void)? = nil
     ) {
+        print("🔍 DEBUG: IngredientListView.init() called with \(ingredients.count) ingredients")
+        ingredients.forEach { ingredient in
+            print("  📦 init: \(ingredient.name)")
+        }
         // Use _ingredients to set the @State wrapper's initial value
         self._ingredients = State(initialValue: ingredients)
+        print("🔍 DEBUG: _ingredients State wrapper initialized")
         self.onConfirm = onConfirm
         self.onRescan = onRescan
     }
@@ -58,7 +63,8 @@ struct IngredientListView: View {
     // MARK: - Subviews
 
     private var headerView: some View {
-        VStack(spacing: 8) {
+        let _ = print("🔍 DEBUG: headerView rendering with \(ingredients.count) ingredients")
+        return VStack(spacing: 8) {
             Text("Review Ingredients")
                 .font(.title2)
                 .fontWeight(.bold)
