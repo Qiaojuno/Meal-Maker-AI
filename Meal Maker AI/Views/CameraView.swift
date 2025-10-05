@@ -10,6 +10,7 @@ import AVFoundation
 import PhotosUI
 
 struct CameraView: View {
+    @Environment(\.dismiss) var dismiss
     @StateObject private var viewModel = CameraViewModel()
     @State private var showingPhotoPicker = false
     @State private var showingCamera = false
@@ -18,23 +19,60 @@ struct CameraView: View {
     var onIngredientsIdentified: (([Ingredient]) -> Void)?
 
     var body: some View {
-        ZStack {
-            Color.black.ignoresSafeArea()
+        VStack(spacing: 0) {
+            // Title bar (matching home screen with back button)
+            VStack(spacing: 0) {
+                HStack {
+                    // Back button
+                    Button(action: {
+                        dismiss()
+                    }) {
+                        Image(systemName: "chevron.left")
+                            .font(.title2)
+                            .fontWeight(.semibold)
+                            .foregroundColor(Color(red: 74/255, green: 93/255, blue: 74/255)) // Green
+                            .padding(.trailing, 8)
+                    }
 
-            VStack(spacing: 20) {
-                if viewModel.isProcessing {
-                    // Processing state
-                    processingView
-                } else if !viewModel.identifiedIngredients.isEmpty {
-                    // Success - show ingredients and proceed
-                    successView
-                } else {
-                    // Initial state - capture options
-                    captureOptionsView
+                    Text("Scan Fridge")
+                        .font(.title)
+                        .fontWeight(.bold)
+                        .foregroundColor(.black)
+
+                    Spacer()
+                }
+                .padding(.horizontal)
+                .padding(.top, 20)
+                .padding(.bottom, 12)
+            }
+            .background(Color.white)
+            .shadow(color: .black.opacity(0.05), radius: 2, y: 1)
+            .ignoresSafeArea(edges: .top)
+
+            // Content area
+            ZStack {
+                Color(red: 248/255, green: 248/255, blue: 248/255) // #F8F8F8
+                    .ignoresSafeArea()
+
+                ScrollView {
+                    VStack(spacing: 20) {
+                        if viewModel.isProcessing {
+                            // Processing state
+                            processingView
+                        } else if !viewModel.identifiedIngredients.isEmpty {
+                            // Success - show ingredients and proceed
+                            successView
+                        } else {
+                            // Initial state - capture options
+                            captureOptionsView
+                        }
+                    }
+                    .padding(.top, 40)
+                    .padding(.horizontal)
                 }
             }
-            .padding()
         }
+        .navigationBarHidden(true)
         .sheet(isPresented: $showingPhotoPicker) {
             PhotoPicker(image: $viewModel.capturedImage, onImageSelected: handleImageSelected)
         }
@@ -56,106 +94,146 @@ struct CameraView: View {
     // MARK: - Subviews
 
     private var captureOptionsView: some View {
-        VStack(spacing: 30) {
-            Spacer()
-
-            VStack(spacing: 12) {
+        VStack(spacing: 40) {
+            // Header section
+            VStack(spacing: 16) {
                 Image(systemName: "camera.fill")
-                    .font(.system(size: 60))
-                    .foregroundColor(.white)
+                    .font(.system(size: 70))
+                    .foregroundColor(Color(red: 74/255, green: 93/255, blue: 74/255)) // #4A5D4A green
 
                 Text("Scan Your Fridge")
                     .font(.title)
                     .fontWeight(.bold)
-                    .foregroundColor(.white)
+                    .foregroundColor(.black)
 
-                Text("Take a photo of your fridge contents to get started")
+                Text("Take a photo of your fridge contents to identify ingredients")
                     .font(.subheadline)
                     .foregroundColor(.gray)
                     .multilineTextAlignment(.center)
-                    .padding(.horizontal)
+                    .padding(.horizontal, 20)
             }
+            .padding(.top, 60)
+
+            // Button section
+            VStack(spacing: 16) {
+                // Primary button - Take Photo
+                Button(action: { showingCamera = true }) {
+                    HStack(spacing: 12) {
+                        Image(systemName: "camera.fill")
+                            .font(.title3)
+                        Text("Take Photo")
+                            .font(.headline)
+                    }
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(Color(red: 74/255, green: 93/255, blue: 74/255)) // #4A5D4A green
+                    .cornerRadius(12)
+                    .shadow(color: .black.opacity(0.1), radius: 4, y: 2)
+                }
+
+                // Secondary button - Choose from Library
+                Button(action: { showingPhotoPicker = true }) {
+                    HStack(spacing: 12) {
+                        Image(systemName: "photo.on.rectangle")
+                            .font(.title3)
+                        Text("Choose from Library")
+                            .font(.headline)
+                    }
+                    .foregroundColor(Color(red: 74/255, green: 93/255, blue: 74/255))
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(Color.white)
+                    .cornerRadius(12)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color(red: 74/255, green: 93/255, blue: 74/255), lineWidth: 2)
+                    )
+                    .shadow(color: .black.opacity(0.1), radius: 4, y: 2)
+                }
+            }
+            .padding(.horizontal, 30)
 
             Spacer()
-
-            VStack(spacing: 16) {
-                Button(action: { showingCamera = true }) {
-                    Label("Take Photo", systemImage: "camera")
-                        .font(.headline)
-                        .foregroundColor(.black)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.white)
-                        .cornerRadius(12)
-                }
-
-                Button(action: { showingPhotoPicker = true }) {
-                    Label("Choose from Library", systemImage: "photo.on.rectangle")
-                        .font(.headline)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.gray.opacity(0.3))
-                        .cornerRadius(12)
-                }
-            }
-            .padding(.horizontal, 40)
-            .padding(.bottom, 40)
         }
     }
 
     private var processingView: some View {
-        VStack(spacing: 20) {
-            ProgressView()
-                .scaleEffect(1.5)
-                .progressViewStyle(CircularProgressViewStyle(tint: .white))
+        VStack(spacing: 30) {
+            Spacer()
 
-            Text("Analyzing your fridge...")
-                .font(.headline)
-                .foregroundColor(.white)
+            VStack(spacing: 20) {
+                ProgressView()
+                    .scaleEffect(2.0)
+                    .progressViewStyle(CircularProgressViewStyle(tint: Color(red: 74/255, green: 93/255, blue: 74/255))) // Green spinner
 
-            Text("This may take a few seconds")
-                .font(.subheadline)
-                .foregroundColor(.gray)
-        }
-    }
-
-    private var successView: some View {
-        VStack(spacing: 20) {
-            Image(systemName: "checkmark.circle.fill")
-                .font(.system(size: 60))
-                .foregroundColor(.green)
-
-            Text("Found \(viewModel.identifiedIngredients.count) ingredients!")
-                .font(.title2)
-                .fontWeight(.bold)
-                .foregroundColor(.white)
-
-            Button {
-                // Fix: Use DispatchQueue to ensure state is fully propagated
-                // This prevents race condition where button click happens
-                // before @Published property updates the view
-                DispatchQueue.main.async {
-                    proceedToIngredients()
-                }
-            } label: {
-                Text("Review Ingredients")
-                    .font(.headline)
+                Text("Analyzing your fridge...")
+                    .font(.title2)
+                    .fontWeight(.semibold)
                     .foregroundColor(.black)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.white)
-                    .cornerRadius(12)
-            }
-            .padding(.horizontal, 40)
-            .padding(.top, 20)
 
-            Button(action: viewModel.reset) {
-                Text("Scan Again")
+                Text("This may take a few seconds")
                     .font(.subheadline)
                     .foregroundColor(.gray)
             }
+            .padding(40)
+            .background(Color.white)
+            .cornerRadius(16)
+            .shadow(color: .black.opacity(0.1), radius: 8, y: 4)
+
+            Spacer()
         }
+        .padding(.horizontal, 30)
+    }
+
+    private var successView: some View {
+        VStack(spacing: 30) {
+            Spacer()
+
+            // Success card
+            VStack(spacing: 24) {
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.system(size: 70))
+                    .foregroundColor(Color(red: 74/255, green: 93/255, blue: 74/255)) // Green checkmark
+
+                Text("Found \(viewModel.identifiedIngredients.count) ingredients!")
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .foregroundColor(.black)
+
+                // Review button
+                Button {
+                    // Fix: Use DispatchQueue to ensure state is fully propagated
+                    DispatchQueue.main.async {
+                        proceedToIngredients()
+                    }
+                } label: {
+                    Text("Review Ingredients")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .background(Color(red: 74/255, green: 93/255, blue: 74/255)) // #4A5D4A green
+                        .cornerRadius(12)
+                        .shadow(color: .black.opacity(0.1), radius: 4, y: 2)
+                }
+
+                // Scan again button
+                Button(action: viewModel.reset) {
+                    Text("Scan Again")
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .foregroundColor(.gray)
+                }
+            }
+            .padding(30)
+            .background(Color.white)
+            .cornerRadius(16)
+            .shadow(color: .black.opacity(0.1), radius: 8, y: 4)
+
+            Spacer()
+        }
+        .padding(.horizontal, 30)
     }
 
     // MARK: - Actions

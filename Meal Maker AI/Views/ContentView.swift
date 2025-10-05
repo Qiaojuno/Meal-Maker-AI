@@ -10,12 +10,13 @@ import SwiftUI
 struct ContentView: View {
     @State private var selectedTab = 0
     @State private var showAddSheet = false // For the + button
+    @State private var homeNavigationPath = NavigationPath() // Shared navigation path for home tab
 
     var body: some View {
         ZStack(alignment: .bottom) {
             // Main content
             TabView(selection: $selectedTab) {
-                HomeTabView()
+                HomeTabView(navigationPath: $homeNavigationPath)
                     .tag(0)
 
                 SavedRecipesView()
@@ -24,7 +25,11 @@ struct ContentView: View {
             .tabViewStyle(.page(indexDisplayMode: .never)) // Hides default tab bar
 
             // Custom navigation bar overlay
-            CustomNavBar(selectedTab: $selectedTab, showAddSheet: $showAddSheet)
+            CustomNavBar(
+                selectedTab: $selectedTab,
+                showAddSheet: $showAddSheet,
+                homeNavigationPath: $homeNavigationPath
+            )
         }
         .sheet(isPresented: $showAddSheet) {
             // What happens when + is pressed (customize this later)
@@ -48,6 +53,7 @@ struct ContentView: View {
 struct CustomNavBar: View {
     @Binding var selectedTab: Int
     @Binding var showAddSheet: Bool
+    @Binding var homeNavigationPath: NavigationPath
     @State private var isExpanded = false // State for radial menu
 
     var body: some View {
@@ -56,6 +62,8 @@ struct CustomNavBar: View {
                 // Home button
                 NavButton(icon: "house.fill", isSelected: selectedTab == 0) {
                     selectedTab = 0
+                    // Clear navigation path to return to home root
+                    homeNavigationPath = NavigationPath()
                 }
                 .offset(y: -15)
                 .offset(x: 25)
@@ -178,8 +186,8 @@ struct NavButton: View {
 // MARK: - Home Tab View
 
 struct HomeTabView: View {
+    @Binding var navigationPath: NavigationPath
     @StateObject private var viewModel = HomeViewModel()
-    @State private var navigationPath = NavigationPath()
     @State private var expandedCategories: Set<String> = []
 
     var body: some View {
@@ -347,6 +355,12 @@ enum HomeDestination: Hashable {
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
+    }
+}
+
+struct HomeTabView_Previews: PreviewProvider {
+    static var previews: some View {
+        HomeTabView(navigationPath: .constant(NavigationPath()))
     }
 }
 #endif
