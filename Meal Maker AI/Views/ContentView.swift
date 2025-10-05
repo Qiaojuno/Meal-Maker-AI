@@ -17,13 +17,14 @@ struct ContentView: View {
     @State private var showAddSheet = false
     @State private var isMenuExpanded = false
     @State private var homeNavigationPath = NavigationPath() // Manage home navigation
+    @StateObject private var homeViewModel = HomeViewModel() // Shared home view model
 
     var body: some View {
         ZStack(alignment: .bottom) {
             // Layer 1: Main content (blurred when expanded)
             Group {
                 TabView(selection: $selectedTab) {
-                    HomeTabView(navigationPath: $homeNavigationPath).tag(0)
+                    HomeTabView(viewModel: homeViewModel, navigationPath: $homeNavigationPath).tag(0)
                     SavedRecipesView().tag(1)
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
@@ -74,15 +75,20 @@ struct ContentView: View {
 
     private var radialMenuButtons: some View {
         ZStack(alignment: .bottomTrailing) {
-            // Saved Recipes button (changed from "Find Recipes")
+            // Generate Recipes button
             RadialMenuButton(
-                icon: "bookmark.fill",
-                label: "Saved Recipes",
+                icon: "wand.and.stars",
+                label: "Generate Recipes",
                 color: .brandGreen
             ) {
                 withAnimation {
                     isMenuExpanded = false
-                    selectedTab = 1 // Navigate to SavedRecipesView
+                    selectedTab = 0 // Switch to home tab
+                    homeNavigationPath = NavigationPath() // Reset navigation to home
+                    // Trigger recipe generation on HomeViewModel
+                    Task {
+                        await homeViewModel.generateNewRecipes()
+                    }
                 }
             }
             .offset(x: -59, y: -180)
@@ -127,8 +133,7 @@ struct ContentView: View {
                     .frame(width: 90, height: 90)
                     .overlay(
                         Image(systemName: isMenuExpanded ? "xmark" : "plus")
-                            .font(.title2)
-                            .fontWeight(.semibold)
+                            .font(.custom("Archivo-SemiBold", size: 22))
                             .foregroundColor(isMenuExpanded ? .black : .white)
                             .rotationEffect(.degrees(isMenuExpanded ? 90 : 0))
                     )
@@ -202,8 +207,7 @@ struct RadialMenuButton: View {
         Button(action: action) {
             HStack(alignment: .center, spacing: 12) {
                 Text(label)
-                    .font(.caption)
-                    .fontWeight(.medium)
+                    .font(.custom("Archivo-Medium", size: 12))
                     .foregroundColor(.white)
 
                 Circle()
@@ -211,7 +215,7 @@ struct RadialMenuButton: View {
                     .frame(width: 60, height: 60)
                     .overlay(
                         Image(systemName: icon)
-                            .font(.title3)
+                            .font(.custom("Archivo-Regular", size: 20))
                             .foregroundColor(.white)
                     )
             }
@@ -230,7 +234,7 @@ struct NavButton: View {
     var body: some View {
         Button(action: action) {
             Image(systemName: icon)
-                .font(.system(size: 24))
+                .font(.custom("Archivo-Regular", size: 24))
                 .foregroundColor(isSelected ? .brandGreen : .gray)
         }
     }
@@ -239,13 +243,14 @@ struct NavButton: View {
 // MARK: - Home Tab View
 
 struct HomeTabView: View {
+    @ObservedObject var viewModel: HomeViewModel
     @Binding var navigationPath: NavigationPath
     @State private var identifiedIngredients: [Ingredient] = []
 
     var body: some View {
         NavigationStack(path: $navigationPath) {
             // HomeScreen is the root view
-            HomeScreen(navigationPath: $navigationPath)
+            HomeScreen(viewModel: viewModel, navigationPath: $navigationPath)
                 .navigationBarHidden(true)
                 .navigationDestination(for: NavigationDestination.self) { destination in
                     switch destination {
@@ -259,14 +264,15 @@ struct HomeTabView: View {
                             ingredients: ingredients,
                             onConfirm: { confirmedIngredients in
                                 identifiedIngredients = confirmedIngredients
-                                navigationPath.append(NavigationDestination.recipeGeneration(confirmedIngredients))
+                                // Save ingredients but don't auto-navigate
+                                StorageService.shared.saveIngredients(confirmedIngredients)
+                                // Go back to home
+                                navigationPath.removeLast()
                             },
                             onRescan: {
                                 navigationPath.removeLast()
                             }
                         )
-                    case .recipeGeneration(let ingredients):
-                        RecipeGenerationView(ingredients: ingredients)
                     case .recipeDetail(let recipe):
                         RecipeDetailView(recipe: recipe)
                     }
@@ -280,7 +286,6 @@ struct HomeTabView: View {
 enum NavigationDestination: Hashable {
     case camera
     case ingredientList([Ingredient])
-    case recipeGeneration([Ingredient])
     case recipeDetail(Recipe)
 }
 
@@ -293,7 +298,7 @@ struct ContentView_Previews: PreviewProvider {
 
 struct HomeTabView_Previews: PreviewProvider {
     static var previews: some View {
-        HomeTabView(navigationPath: .constant(NavigationPath()))
+        HomeTabView(viewModel: HomeViewModel(), navigationPath: .constant(NavigationPath()))
     }
 }
 #endif

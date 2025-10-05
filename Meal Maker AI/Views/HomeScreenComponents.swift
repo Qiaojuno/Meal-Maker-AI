@@ -17,18 +17,17 @@ struct LastUpdatedCard: View {
         Button(action: action) {
             HStack(spacing: 12) {
                 Image(systemName: "clock.fill")
-                    .font(.title3)
+                    .font(.custom("Archivo-Regular", size: 20))
                     .foregroundColor(.white)
 
                 Text(text)
-                    .font(.subheadline)
-                    .fontWeight(.medium)
+                    .font(.custom("Archivo-Medium", size: 15))
                     .foregroundColor(.white)
 
                 Spacer()
 
                 Image(systemName: "chevron.right")
-                    .font(.subheadline)
+                    .font(.custom("Archivo-Regular", size: 15))
                     .foregroundColor(.white)
             }
             .padding()
@@ -60,17 +59,17 @@ struct IngredientCategoryCard: View {
                 HStack(spacing: 16) {
                     // Icon
                     Text(icon)
-                        .font(.system(size: 32))
+                        .font(.custom("Archivo-Regular", size: 32))
 
                     // Text content
                     VStack(alignment: .leading, spacing: 4) {
                         Text(name)
-                            .font(.headline)
+                            .font(.custom("Archivo-SemiBold", size: 17))
                             .foregroundColor(.white)
 
                         if !isExpanded {
                             Text("\(count) item\(count == 1 ? "" : "s")")
-                                .font(.subheadline)
+                                .font(.custom("Archivo-Regular", size: 15))
                                 .foregroundColor(.white)
                         }
                     }
@@ -79,7 +78,7 @@ struct IngredientCategoryCard: View {
 
                     // Chevron
                     Image(systemName: isExpanded ? "chevron.down" : "chevron.right")
-                        .font(.subheadline)
+                        .font(.custom("Archivo-Regular", size: 15))
                         .foregroundColor(.white)
                         .rotationEffect(.degrees(0)) // Smooth rotation handled by icon change
                 }
@@ -93,7 +92,7 @@ struct IngredientCategoryCard: View {
                     ], spacing: 12) {
                         ForEach(ingredients) { ingredient in
                             Text(ingredient.name.capitalized)
-                                .font(.subheadline)
+                                .font(.custom("Archivo-Regular", size: 15))
                                 .foregroundColor(.white)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .padding(.horizontal, 8)
@@ -129,14 +128,14 @@ struct RecipeCard: View {
                     .frame(width: 80, height: 80)
                     .overlay(
                         Image(systemName: "fork.knife")
-                            .font(.title2)
+                            .font(.custom("Archivo-Regular", size: 22))
                             .foregroundColor(.white)
                     )
 
                 // Recipe details
                 VStack(alignment: .leading, spacing: 6) {
                     Text(recipe.title)
-                        .font(.headline)
+                        .font(.custom("Archivo-SemiBold", size: 17))
                         .foregroundColor(.black)
                         .lineLimit(2)
 
@@ -145,9 +144,9 @@ struct RecipeCard: View {
                         if let time = recipe.cookingTime {
                             HStack(spacing: 4) {
                                 Image(systemName: "clock")
-                                    .font(.caption)
+                                    .font(.custom("Archivo-Regular", size: 12))
                                 Text(time)
-                                    .font(.caption)
+                                    .font(.custom("Archivo-Regular", size: 12))
                             }
                             .foregroundColor(.gray)
                         }
@@ -190,8 +189,7 @@ struct DifficultyBadge: View {
 
     var body: some View {
         Text(difficulty.capitalized)
-            .font(.caption)
-            .fontWeight(.medium)
+            .font(.custom("Archivo-Medium", size: 12))
             .foregroundColor(.white)
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
@@ -259,8 +257,7 @@ struct FloatingActionButton: View {
                         .frame(width: 60, height: 60)
                         .overlay(
                             Image(systemName: showMenu ? "xmark" : "plus")
-                                .font(.title3)
-                                .fontWeight(.semibold)
+                                .font(.custom("Archivo-SemiBold", size: 20))
                                 .foregroundColor(.white)
                                 .rotationEffect(.degrees(showMenu ? 90 : 0))
                         )
@@ -284,8 +281,7 @@ struct FABMenuItem: View {
         Button(action: action) {
             HStack(spacing: 12) {
                 Text(label)
-                    .font(.subheadline)
-                    .fontWeight(.medium)
+                    .font(.custom("Archivo-Medium", size: 15))
                     .foregroundColor(.white)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 8)
@@ -297,7 +293,7 @@ struct FABMenuItem: View {
                     .frame(width: 50, height: 50)
                     .overlay(
                         Image(systemName: icon)
-                            .font(.title3)
+                            .font(.custom("Archivo-Regular", size: 20))
                             .foregroundColor(.white)
                     )
                     .shadow(color: .black.opacity(0.2), radius: 4, y: 2)

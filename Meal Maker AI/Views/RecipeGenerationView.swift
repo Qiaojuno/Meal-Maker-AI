@@ -56,10 +56,10 @@ struct RecipeGenerationView: View {
                 .scaleEffect(1.5)
 
             Text("Creating recipes for you...")
-                .font(.headline)
+                .font(.custom("Archivo-SemiBold", size: 17))
 
             Text("This may take a few seconds")
-                .font(.subheadline)
+                .font(.custom("Archivo-Regular", size: 15))
                 .foregroundColor(.gray)
         }
     }
@@ -68,7 +68,7 @@ struct RecipeGenerationView: View {
         ScrollView {
             VStack(spacing: 16) {
                 Text("\(viewModel.generatedRecipes.count) Recipes Found")
-                    .font(.subheadline)
+                    .font(.custom("Archivo-Regular", size: 15))
                     .foregroundColor(.gray)
                     .padding(.top)
 
@@ -92,35 +92,40 @@ struct RecipePreviewCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             // Title
-            Text(recipe.title)
-                .font(.title3)
-                .fontWeight(.bold)
-                .foregroundColor(.primary)
+            ZStack {
+                Text(recipe.title)
+                    .font(.custom("Archivo-Bold", size: 20))
+                    .foregroundColor(.primary)
+                    .opacity(0.5)
+                Text(recipe.title)
+                    .font(.custom("Archivo-Bold", size: 20))
+                    .foregroundColor(.primary)
+            }
 
             // Meta info
             HStack(spacing: 16) {
                 if let cookingTime = recipe.cookingTime {
                     Label(cookingTime, systemImage: "clock")
-                        .font(.subheadline)
+                        .font(.custom("Archivo-Regular", size: 15))
                         .foregroundColor(.gray)
                 }
 
                 if let difficulty = recipe.difficulty {
                     Label(difficulty.capitalized, systemImage: "chart.bar")
-                        .font(.subheadline)
+                        .font(.custom("Archivo-Regular", size: 15))
                         .foregroundColor(.gray)
                 }
 
                 if let servings = recipe.servings {
                     Label("\(servings) servings", systemImage: "person.2")
-                        .font(.subheadline)
+                        .font(.custom("Archivo-Regular", size: 15))
                         .foregroundColor(.gray)
                 }
             }
 
             // Ingredients preview
             Text("\(recipe.ingredients.count) ingredients")
-                .font(.caption)
+                .font(.custom("Archivo-Regular", size: 12))
                 .foregroundColor(.blue)
         }
         .padding()

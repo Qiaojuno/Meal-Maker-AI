@@ -35,20 +35,28 @@ struct IngredientListView: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            // Header
-            headerView
+        ZStack(alignment: .topLeading) {
+            VStack(spacing: 0) {
+                // Header
+                headerView
 
-            // Ingredients list
-            ingredientsListView
+                // Ingredients list
+                ingredientsListView
 
-            // Add ingredient button
-            addIngredientButton
+                // Add ingredient button
+                addIngredientButton
 
-            // Action buttons
-            actionButtons
+                // Action buttons
+                actionButtons
+            }
+            .background(Color(.systemGroupedBackground))
+
+            // Custom back button overlay
+            backButton
+                .padding(.top, 8)
+                .padding(.leading, 16)
         }
-        .background(Color(.systemGroupedBackground))
+        .navigationBarHidden(true)
         .sheet(isPresented: $showingAddIngredient) {
             addIngredientSheet
         }
@@ -62,15 +70,33 @@ struct IngredientListView: View {
 
     // MARK: - Subviews
 
+    private var backButton: some View {
+        Button(action: rescan) {
+            Circle()
+                .fill(Color.white)
+                .frame(width: 40, height: 40)
+                .overlay(
+                    Image(systemName: "chevron.left")
+                        .font(.custom("Archivo-SemiBold", size: 18))
+                        .foregroundColor(Color(red: 44/255, green: 62/255, blue: 45/255))
+                )
+                .shadow(color: .black.opacity(0.2), radius: 4, y: 2)
+        }
+    }
+
     private var headerView: some View {
         let _ = print("🔍 DEBUG: headerView rendering with \(ingredients.count) ingredients")
         return VStack(spacing: 8) {
-            Text("Review Ingredients")
-                .font(.title2)
-                .fontWeight(.bold)
+            ZStack {
+                Text("Review Ingredients")
+                    .font(.custom("Archivo-SemiBold", size: 22))
+                    .opacity(0.5)
+                Text("Review Ingredients")
+                    .font(.custom("Archivo-SemiBold", size: 22))
+            }
 
             Text("\(ingredients.count) ingredients detected")
-                .font(.subheadline)
+                .font(.custom("Archivo-Regular", size: 15))
                 .foregroundColor(.gray)
         }
         .padding()
@@ -111,7 +137,7 @@ struct IngredientListView: View {
         VStack(spacing: 12) {
             Button(action: confirmIngredients) {
                 Text("Save to Fridge")
-                    .font(.headline)
+                    .font(.custom("Archivo-SemiBold", size: 17))
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .padding()
@@ -123,7 +149,7 @@ struct IngredientListView: View {
 
             Button(action: rescan) {
                 Text("Rescan Fridge")
-                    .font(.subheadline)
+                    .font(.custom("Archivo-Regular", size: 15))
                     .foregroundColor(.gray)
             }
         }
@@ -201,11 +227,11 @@ struct IngredientRow: View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
                 Text(ingredient.name)
-                    .font(.headline)
+                    .font(.custom("Archivo-SemiBold", size: 17))
 
                 if let quantity = ingredient.quantity {
                     Text(quantity)
-                        .font(.subheadline)
+                        .font(.custom("Archivo-Regular", size: 15))
                         .foregroundColor(.gray)
                 }
             }

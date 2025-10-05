@@ -18,10 +18,15 @@ struct SavedRecipesView: View {
                 // Static title bar (matching home screen)
                 VStack(spacing: 0) {
                     HStack {
-                        Text("Meal4Me")
-                            .font(.largeTitle)
-                            .fontWeight(.bold)
-                            .foregroundColor(.black)
+                        ZStack {
+                            Text("Meal4Me")
+                                .font(.custom("Archivo-Bold", size: 34))
+                                .foregroundColor(.black)
+                                .opacity(0.5)
+                            Text("Meal4Me")
+                                .font(.custom("Archivo-Bold", size: 34))
+                                .foregroundColor(.black)
+                        }
                         Spacer()
                     }
                     .padding(.horizontal)
@@ -43,14 +48,18 @@ struct SavedRecipesView: View {
                         VStack(spacing: 0) {
                             // Section header with count
                             HStack {
-                                Text("Saved Recipes")
-                                    .font(.title2)
-                                    .fontWeight(.bold)
-                                    .foregroundColor(.black)
+                                ZStack {
+                                    Text("Saved Recipes")
+                                        .font(.custom("Archivo-SemiBold", size: 22))
+                                        .foregroundColor(.black)
+                                        .opacity(0.5)
+                                    Text("Saved Recipes")
+                                        .font(.custom("Archivo-SemiBold", size: 22))
+                                        .foregroundColor(.black)
+                                }
 
                                 Text("(\(viewModel.savedRecipes.count))")
-                                    .font(.title2)
-                                    .fontWeight(.medium)
+                                    .font(.custom("Archivo-Medium", size: 22))
                                     .foregroundColor(Color(red: 74/255, green: 93/255, blue: 74/255)) // #4A5D4A green
 
                                 Spacer()
@@ -101,16 +110,21 @@ struct SavedRecipesView: View {
     private var emptyStateView: some View {
         VStack(spacing: 20) {
             Image(systemName: "bookmark.slash")
-                .font(.system(size: 60))
+                .font(.custom("Archivo-Regular", size: 60))
                 .foregroundColor(Color(red: 74/255, green: 93/255, blue: 74/255)) // #4A5D4A green
 
-            Text("No Saved Recipes")
-                .font(.title2)
-                .fontWeight(.bold)
-                .foregroundColor(.black)
+            ZStack {
+                Text("No Saved Recipes")
+                    .font(.custom("Archivo-SemiBold", size: 22))
+                    .foregroundColor(.black)
+                    .opacity(0.5)
+                Text("No Saved Recipes")
+                    .font(.custom("Archivo-SemiBold", size: 22))
+                    .foregroundColor(.black)
+            }
 
             Text("Recipes you save will appear here")
-                .font(.subheadline)
+                .font(.custom("Archivo-Regular", size: 15))
                 .foregroundColor(.gray)
                 .multilineTextAlignment(.center)
         }

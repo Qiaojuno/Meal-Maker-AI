@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct HomeScreen: View {
-    @StateObject private var viewModel = HomeViewModel()
+    @ObservedObject var viewModel: HomeViewModel
     @State private var expandedCategories: Set<String> = []
     @Binding var navigationPath: NavigationPath
 
@@ -17,10 +17,15 @@ struct HomeScreen: View {
             // Title bar (matching other views)
             VStack(spacing: 0) {
                 HStack {
-                    Text("Meal4Me")
-                        .font(.largeTitle)
-                        .fontWeight(.bold)
-                        .foregroundColor(.black)
+                    ZStack {
+                        Text("Meal4Me")
+                            .font(.custom("Archivo-Bold", size: 34))
+                            .foregroundColor(.black)
+                            .opacity(0.5)
+                        Text("Meal4Me")
+                            .font(.custom("Archivo-Bold", size: 34))
+                            .foregroundColor(.black)
+                    }
 
                     Spacer()
                 }
@@ -47,39 +52,77 @@ struct HomeScreen: View {
                     }
 
                     // Ingredient Categories
-                    VStack(spacing: 12) {
-                        ForEach(viewModel.categoryData, id: \.name) { category in
-                            IngredientCategoryCard(
-                                name: category.name,
-                                icon: category.icon,
-                                color: category.color,
-                                count: category.count,
-                                ingredients: viewModel.ingredientsByCategory[category.name] ?? [],
-                                isExpanded: Binding(
-                                    get: { expandedCategories.contains(category.name) },
-                                    set: { isExpanded in
-                                        if isExpanded {
-                                            expandedCategories.insert(category.name)
-                                        } else {
-                                            expandedCategories.remove(category.name)
+                    VStack(alignment: .leading, spacing: 12) {
+                        ZStack(alignment: .leading) {
+                            Text("Ingredients")
+                                .font(.custom("Archivo-SemiBold", size: 22))
+                                .foregroundColor(.black)
+                                .opacity(0.5)
+                            Text("Ingredients")
+                                .font(.custom("Archivo-SemiBold", size: 22))
+                                .foregroundColor(.black)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+
+                        VStack(spacing: 12) {
+                            ForEach(viewModel.categoryData, id: \.name) { category in
+                                IngredientCategoryCard(
+                                    name: category.name,
+                                    icon: category.icon,
+                                    color: category.color,
+                                    count: category.count,
+                                    ingredients: viewModel.ingredientsByCategory[category.name] ?? [],
+                                    isExpanded: Binding(
+                                        get: { expandedCategories.contains(category.name) },
+                                        set: { isExpanded in
+                                            if isExpanded {
+                                                expandedCategories.insert(category.name)
+                                            } else {
+                                                expandedCategories.remove(category.name)
+                                            }
                                         }
-                                    }
+                                    )
                                 )
-                            )
+                            }
                         }
                     }
+                    .padding()
+                    .background(Color.white)
+                    .cornerRadius(12)
 
-                    // Recent Recipes Section (if any)
-                    if !viewModel.recentRecipes.isEmpty {
+                    // Recent Recipes Section (if any or loading)
+                    if viewModel.isLoading || !viewModel.recentRecipes.isEmpty {
                         VStack(alignment: .leading, spacing: 12) {
-                            Text("Recent Recipes")
-                                .font(.title2)
-                                .fontWeight(.bold)
-                                .foregroundColor(.black)
+                            ZStack {
+                                Text("Recent Recipes")
+                                    .font(.custom("Archivo-SemiBold", size: 22))
+                                    .foregroundColor(.black)
+                                    .opacity(0.5)
+                                Text("Recent Recipes")
+                                    .font(.custom("Archivo-SemiBold", size: 22))
+                                    .foregroundColor(.black)
+                            }
 
-                            ForEach(viewModel.recentRecipes.prefix(5)) { recipe in
-                                RecipeCard(recipe: recipe) {
-                                    navigationPath.append(NavigationDestination.recipeDetail(recipe))
+                            if viewModel.isLoading {
+                                // Loading state
+                                VStack(spacing: 16) {
+                                    ProgressView()
+                                        .scaleEffect(1.5)
+
+                                    Text("Generating recipes...")
+                                        .font(.custom("Archivo-Regular", size: 15))
+                                        .foregroundColor(.gray)
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 40)
+                                .background(Color.white)
+                                .cornerRadius(12)
+                            } else {
+                                // Show recipes
+                                ForEach(viewModel.recentRecipes.prefix(5)) { recipe in
+                                    RecipeCard(recipe: recipe) {
+                                        navigationPath.append(NavigationDestination.recipeDetail(recipe))
+                                    }
                                 }
                             }
                         }
@@ -96,9 +139,15 @@ struct HomeScreen: View {
         .onAppear {
             viewModel.loadData()
         }
+        .onChange(of: navigationPath) { oldPath, newPath in
+            // Reload data when navigating back to home (empty path)
+            if newPath.isEmpty {
+                viewModel.loadData()
+            }
+        }
     }
 }
 
 #Preview {
-    HomeScreen(navigationPath: .constant(NavigationPath()))
+    HomeScreen(viewModel: HomeViewModel(), navigationPath: .constant(NavigationPath()))
 }

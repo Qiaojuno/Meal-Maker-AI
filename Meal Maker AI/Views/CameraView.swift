@@ -25,16 +25,20 @@ struct CameraView: View {
                 HStack {
                     Button(action: { dismiss() }) {
                         Image(systemName: "chevron.left")
-                            .font(.title3)
-                            .fontWeight(.semibold)
+                            .font(.custom("Archivo-SemiBold", size: 20))
                             .foregroundColor(.black)
                             .padding(8)
                     }
 
-                    Text("Scan Fridge")
-                        .font(.largeTitle)
-                        .fontWeight(.bold)
-                        .foregroundColor(.black)
+                    ZStack {
+                        Text("Scan Fridge")
+                            .font(.custom("Archivo-Bold", size: 34))
+                            .foregroundColor(.black)
+                            .opacity(0.5)
+                        Text("Scan Fridge")
+                            .font(.custom("Archivo-Bold", size: 34))
+                            .foregroundColor(.black)
+                    }
 
                     Spacer()
                 }
@@ -95,16 +99,21 @@ struct CameraView: View {
             // Header section
             VStack(spacing: 16) {
                 Image(systemName: "camera.fill")
-                    .font(.system(size: 70))
+                    .font(.custom("Archivo-Regular", size: 70))
                     .foregroundColor(Color(red: 74/255, green: 93/255, blue: 74/255)) // #4A5D4A green
 
-                Text("Scan Your Fridge")
-                    .font(.title)
-                    .fontWeight(.bold)
-                    .foregroundColor(.black)
+                ZStack {
+                    Text("Scan Your Fridge")
+                        .font(.custom("Archivo-SemiBold", size: 28))
+                        .foregroundColor(.black)
+                        .opacity(0.5)
+                    Text("Scan Your Fridge")
+                        .font(.custom("Archivo-SemiBold", size: 28))
+                        .foregroundColor(.black)
+                }
 
                 Text("Take a photo of your fridge contents to identify ingredients")
-                    .font(.subheadline)
+                    .font(.custom("Archivo-Regular", size: 15))
                     .foregroundColor(.gray)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 20)
@@ -117,9 +126,9 @@ struct CameraView: View {
                 Button(action: { showingCamera = true }) {
                     HStack(spacing: 12) {
                         Image(systemName: "camera.fill")
-                            .font(.title3)
+                            .font(.custom("Archivo-Regular", size: 20))
                         Text("Take Photo")
-                            .font(.headline)
+                            .font(.custom("Archivo-SemiBold", size: 17))
                     }
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
@@ -133,9 +142,9 @@ struct CameraView: View {
                 Button(action: { showingPhotoPicker = true }) {
                     HStack(spacing: 12) {
                         Image(systemName: "photo.on.rectangle")
-                            .font(.title3)
+                            .font(.custom("Archivo-Regular", size: 20))
                         Text("Choose from Library")
-                            .font(.headline)
+                            .font(.custom("Archivo-SemiBold", size: 17))
                     }
                     .foregroundColor(Color(red: 74/255, green: 93/255, blue: 74/255))
                     .frame(maxWidth: .infinity)
@@ -165,12 +174,11 @@ struct CameraView: View {
                     .progressViewStyle(CircularProgressViewStyle(tint: Color(red: 74/255, green: 93/255, blue: 74/255))) // Green spinner
 
                 Text("Analyzing your fridge...")
-                    .font(.title2)
-                    .fontWeight(.semibold)
+                    .font(.custom("Archivo-SemiBold", size: 22))
                     .foregroundColor(.black)
 
                 Text("This may take a few seconds")
-                    .font(.subheadline)
+                    .font(.custom("Archivo-Regular", size: 15))
                     .foregroundColor(.gray)
             }
             .padding(40)
@@ -190,13 +198,18 @@ struct CameraView: View {
             // Success card
             VStack(spacing: 24) {
                 Image(systemName: "checkmark.circle.fill")
-                    .font(.system(size: 70))
+                    .font(.custom("Archivo-Regular", size: 70))
                     .foregroundColor(Color(red: 74/255, green: 93/255, blue: 74/255)) // Green checkmark
 
-                Text("Found \(viewModel.identifiedIngredients.count) ingredients!")
-                    .font(.title2)
-                    .fontWeight(.bold)
-                    .foregroundColor(.black)
+                ZStack {
+                    Text("Found \(viewModel.identifiedIngredients.count) ingredients!")
+                        .font(.custom("Archivo-SemiBold", size: 22))
+                        .foregroundColor(.black)
+                        .opacity(0.5)
+                    Text("Found \(viewModel.identifiedIngredients.count) ingredients!")
+                        .font(.custom("Archivo-SemiBold", size: 22))
+                        .foregroundColor(.black)
+                }
 
                 // Review button
                 Button {
@@ -206,7 +219,7 @@ struct CameraView: View {
                     }
                 } label: {
                     Text("Review Ingredients")
-                        .font(.headline)
+                        .font(.custom("Archivo-SemiBold", size: 17))
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 16)
@@ -218,8 +231,7 @@ struct CameraView: View {
                 // Scan again button
                 Button(action: viewModel.reset) {
                     Text("Scan Again")
-                        .font(.subheadline)
-                        .fontWeight(.medium)
+                        .font(.custom("Archivo-Medium", size: 15))
                         .foregroundColor(.gray)
                 }
             }
