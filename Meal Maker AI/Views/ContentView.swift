@@ -99,14 +99,18 @@ struct ContentView: View {
                 label: "Update Fridge",
                 color: .brandGreen
             ) {
-                withAnimation {
-                    isMenuExpanded = false
-                    selectedTab = 0 // Switch to home tab
-                    homeNavigationPath = NavigationPath() // Reset navigation
-                    // Navigate to camera
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                        homeNavigationPath.append(NavigationDestination.camera)
-                    }
+                isMenuExpanded = false
+                // Reset navigation first
+                homeNavigationPath = NavigationPath()
+
+                // If not on home tab, switch without animation to avoid visual glitch
+                if selectedTab != 0 {
+                    selectedTab = 0
+                }
+
+                // Navigate to camera immediately
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                    homeNavigationPath.append(NavigationDestination.camera)
                 }
             }
             .offset(x: -59, y: -100)
