@@ -9,8 +9,13 @@ import SwiftUI
 
 struct RecipeDetailView: View {
     let recipe: Recipe
-    @ObservedObject var viewModel: RecipeViewModel
+    @StateObject private var viewModel: RecipeViewModel
     @State private var isSaved: Bool = false
+
+    init(recipe: Recipe, viewModel: RecipeViewModel? = nil) {
+        self.recipe = recipe
+        self._viewModel = StateObject(wrappedValue: viewModel ?? RecipeViewModel())
+    }
 
     var body: some View {
         ScrollView {
@@ -134,7 +139,12 @@ struct RecipeDetailView: View {
     // MARK: - Actions
 
     private func toggleSave() {
-        if !isSaved {
+        if isSaved {
+            // Unsave the recipe
+            viewModel.unsaveRecipe(recipe)
+            isSaved = false
+        } else {
+            // Save the recipe
             viewModel.saveRecipe(recipe)
             isSaved = true
         }

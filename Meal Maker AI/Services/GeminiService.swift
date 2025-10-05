@@ -68,12 +68,18 @@ class GeminiService {
 
         Be specific with ingredient names. Use common grocery store names.
 
+        CATEGORIZE each ingredient into EXACTLY one of these categories:
+        - "Vegetables" - all vegetables and fruits
+        - "Carbohydrates" - bread, pasta, rice, potatoes, grains
+        - "Protein" - meat, fish, eggs, tofu, beans
+        - "Dairy" - milk, cheese, yogurt, butter
+
         Return ONLY valid JSON in this exact format:
         {
           "ingredients": [
-            {"name": "chicken breast", "quantity": "2 pieces"},
-            {"name": "cheddar cheese", "quantity": "1 block"},
-            {"name": "spinach", "quantity": "1 bag"}
+            {"name": "chicken breast", "quantity": "2 pieces", "category": "Protein"},
+            {"name": "cheddar cheese", "quantity": "1 block", "category": "Dairy"},
+            {"name": "spinach", "quantity": "1 bag", "category": "Vegetables"}
           ]
         }
 
@@ -82,6 +88,8 @@ class GeminiService {
         - Use specific names (e.g., "cheddar cheese" not "cheese", "chicken breast" not "meat")
         - Estimate realistic quantities
         - List most important ingredients first
+        - MUST include "category" field for each ingredient
+        - Category must be one of: "Vegetables", "Carbohydrates", "Protein", "Dairy"
         - Return up to \(maxIngredients) significant ingredients maximum
         """
 

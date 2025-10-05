@@ -10,20 +10,86 @@ import SwiftUI
 struct SavedRecipesView: View {
     @StateObject private var viewModel = SavedRecipesViewModel()
     @StateObject private var recipeViewModel = RecipeViewModel()  // For detail view
+    @State private var navigationPath = NavigationPath()
 
     var body: some View {
-        NavigationStack {
-            ZStack {
-                Color(.systemGroupedBackground).ignoresSafeArea()
+        NavigationStack(path: $navigationPath) {
+            VStack(spacing: 0) {
+                // Static title bar (matching home screen)
+                VStack(spacing: 0) {
+                    HStack {
+                        Text("Meal4Me")
+                            .font(.largeTitle)
+                            .fontWeight(.bold)
+                            .foregroundColor(.black)
+                        Spacer()
+                    }
+                    .padding(.horizontal)
+                    .padding(.top, 20)
+                    .padding(.bottom, 12)
+                }
+                .background(Color.white)
+                .shadow(color: .black.opacity(0.05), radius: 2, y: 1)
+                .ignoresSafeArea(edges: .top)
 
-                if viewModel.savedRecipes.isEmpty {
-                    emptyStateView
-                } else {
-                    recipesList
+                // Scrollable content
+                ZStack {
+                    Color(red: 248/255, green: 248/255, blue: 248/255) // #F8F8F8 background
+                        .ignoresSafeArea()
+
+                    if viewModel.savedRecipes.isEmpty {
+                        emptyStateView
+                    } else {
+                        VStack(spacing: 0) {
+                            // Section header with count
+                            HStack {
+                                Text("Saved Recipes")
+                                    .font(.title2)
+                                    .fontWeight(.bold)
+                                    .foregroundColor(.black)
+
+                                Text("(\(viewModel.savedRecipes.count))")
+                                    .font(.title2)
+                                    .fontWeight(.medium)
+                                    .foregroundColor(Color(red: 74/255, green: 93/255, blue: 74/255)) // #4A5D4A green
+
+                                Spacer()
+                            }
+                            .padding(.horizontal)
+                            .padding(.top, 20)
+                            .padding(.bottom, 12)
+
+                            // Recipes scroll view
+                            ScrollView {
+                                VStack(spacing: 12) {
+                                    ForEach(viewModel.savedRecipes) { recipe in
+                                        RecipeCard(recipe: recipe) {
+                                            navigationPath.append(recipe)
+                                        }
+                                        .contextMenu {
+                                            Button(role: .destructive) {
+                                                withAnimation {
+                                                    viewModel.deleteRecipe(recipe)
+                                                }
+                                            } label: {
+                                                Label("Unsave Recipe", systemImage: "bookmark.slash.fill")
+                                            }
+                                        }
+                                    }
+                                }
+                                .padding(.horizontal)
+                            }
+                        }
+                    }
+                }
+                .safeAreaInset(edge: .bottom) {
+                    Color.clear.frame(height: 80) // Space for nav bar
                 }
             }
-            .navigationTitle("Saved Recipes")
-            .navigationBarTitleDisplayMode(.large)
+            .navigationBarHidden(true)
+            .navigationDestination(for: Recipe.self) { recipe in
+                RecipeDetailView(recipe: recipe, viewModel: recipeViewModel)
+            }
             .onAppear {
                 viewModel.loadSavedRecipes()
             }
@@ -36,68 +102,20 @@ struct SavedRecipesView: View {
         VStack(spacing: 20) {
             Image(systemName: "bookmark.slash")
                 .font(.system(size: 60))
-                .foregroundColor(.gray)
+                .foregroundColor(Color(red: 74/255, green: 93/255, blue: 74/255)) // #4A5D4A green
 
             Text("No Saved Recipes")
                 .font(.title2)
                 .fontWeight(.bold)
+                .foregroundColor(.black)
 
             Text("Recipes you save will appear here")
                 .font(.subheadline)
                 .foregroundColor(.gray)
                 .multilineTextAlignment(.center)
         }
-        .padding()
-    }
-
-    private var recipesList: some View {
-        List {
-            ForEach(viewModel.savedRecipes) { recipe in
-                NavigationLink(destination: RecipeDetailView(recipe: recipe, viewModel: recipeViewModel)) {
-                    SavedRecipeRow(recipe: recipe)
-                }
-            }
-            .onDelete(perform: viewModel.deleteRecipe)
-        }
-        .listStyle(.insetGrouped)
-    }
-}
-
-// MARK: - Saved Recipe Row
-
-struct SavedRecipeRow: View {
-    let recipe: Recipe
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(recipe.title)
-                .font(.headline)
-
-            HStack(spacing: 12) {
-                if let cookingTime = recipe.cookingTime {
-                    Label(cookingTime, systemImage: "clock")
-                        .font(.caption)
-                        .foregroundColor(.gray)
-                }
-
-                if let difficulty = recipe.difficulty {
-                    Label(difficulty.capitalized, systemImage: "chart.bar")
-                        .font(.caption)
-                        .foregroundColor(.gray)
-                }
-            }
-
-            Text("Saved \(recipe.createdAt, formatter: relativeDateFormatter)")
-                .font(.caption2)
-                .foregroundColor(.gray)
-        }
-        .padding(.vertical, 4)
-    }
-
-    private var relativeDateFormatter: RelativeDateTimeFormatter {
-        let formatter = RelativeDateTimeFormatter()
-        formatter.unitsStyle = .abbreviated
-        return formatter
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 60)
     }
 }
 

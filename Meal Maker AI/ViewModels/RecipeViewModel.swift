@@ -31,6 +31,9 @@ class RecipeViewModel: ObservableObject {
         do {
             let recipes = try await geminiService.generateRecipes(from: ingredients)
             generatedRecipes = recipes
+
+            // Add to recent recipes list (for home screen display)
+            storageService.addToRecentRecipes(recipes)
         } catch let error as GeminiError {
             errorMessage = error.errorDescription
         } catch {
@@ -47,6 +50,16 @@ class RecipeViewModel: ObservableObject {
         // Update local state to reflect saved status
         if let index = generatedRecipes.firstIndex(where: { $0.id == recipe.id }) {
             generatedRecipes[index].isSaved = true
+        }
+    }
+
+    /// Unsave (delete) a recipe from local storage
+    func unsaveRecipe(_ recipe: Recipe) {
+        storageService.deleteRecipe(recipe)
+
+        // Update local state to reflect unsaved status
+        if let index = generatedRecipes.firstIndex(where: { $0.id == recipe.id }) {
+            generatedRecipes[index].isSaved = false
         }
     }
 

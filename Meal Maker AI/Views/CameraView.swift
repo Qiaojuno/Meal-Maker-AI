@@ -161,18 +161,25 @@ struct CameraView: View {
     // MARK: - Actions
 
     private func handleImageSelected(_ image: UIImage) {
+        print("🔍 [CameraView] handleImageSelected() called with image: \(image.size)")
         // Process the image directly (don't rely on binding timing)
         Task {
+            print("🔍 [CameraView] Starting async processImage task")
             await viewModel.processImage(image)
+            print("🔍 [CameraView] processImage task completed")
+            print("🔍 [CameraView] viewModel.identifiedIngredients.count = \(viewModel.identifiedIngredients.count)")
         }
     }
 
     private func proceedToIngredients() {
-        print("🔍 DEBUG: Proceeding with \(viewModel.identifiedIngredients.count) ingredients")
+        print("🔍 [CameraView] proceedToIngredients() called")
+        print("🔍 [CameraView] viewModel.identifiedIngredients.count = \(viewModel.identifiedIngredients.count)")
         viewModel.identifiedIngredients.forEach { ingredient in
-            print("  - \(ingredient.name) (\(ingredient.quantity ?? "no quantity"))")
+            print("  📦 Sending: \(ingredient.name) - \(ingredient.quantity ?? "no quantity")")
         }
+        print("🔍 [CameraView] Calling callback with \(viewModel.identifiedIngredients.count) ingredients")
         onIngredientsIdentified?(viewModel.identifiedIngredients)
+        print("🔍 [CameraView] Callback completed")
     }
 }
 

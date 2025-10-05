@@ -74,7 +74,7 @@ struct RecipeGenerationView: View {
 
                 ForEach(viewModel.generatedRecipes) { recipe in
                     NavigationLink(destination: RecipeDetailView(recipe: recipe, viewModel: viewModel)) {
-                        RecipeCard(recipe: recipe)
+                        RecipePreviewCard(recipe: recipe)
                     }
                     .buttonStyle(.plain)
                 }
@@ -84,9 +84,9 @@ struct RecipeGenerationView: View {
     }
 }
 
-// MARK: - Recipe Card
+// MARK: - Recipe Preview Card
 
-struct RecipeCard: View {
+struct RecipePreviewCard: View {
     let recipe: Recipe
 
     var body: some View {

@@ -110,12 +110,12 @@ struct IngredientListView: View {
     private var actionButtons: some View {
         VStack(spacing: 12) {
             Button(action: confirmIngredients) {
-                Text("Generate Recipes")
+                Text("Save to Fridge")
                     .font(.headline)
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color.blue)
+                    .background(Color(red: 74/255, green: 93/255, blue: 74/255))
                     .cornerRadius(12)
             }
             .disabled(ingredients.isEmpty)

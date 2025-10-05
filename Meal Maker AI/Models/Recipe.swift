@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Recipe: Identifiable, Codable {
+struct Recipe: Identifiable, Codable, Hashable {
     var id: UUID = UUID()  // Mutable to allow decoding
     let title: String
     let ingredients: [String]
