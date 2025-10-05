@@ -18,15 +18,10 @@ struct SavedRecipesView: View {
                 // Static title bar (matching home screen)
                 VStack(spacing: 0) {
                     HStack {
-                        ZStack {
-                            Text("Meal4Me")
-                                .font(.custom("Archivo-Bold", size: 34))
-                                .foregroundColor(.black)
-                                .opacity(0.5)
-                            Text("Meal4Me")
-                                .font(.custom("Archivo-Bold", size: 34))
-                                .foregroundColor(.black)
-                        }
+                        Image("Meal4Me")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(height: 34)
                         Spacer()
                     }
                     .padding(.horizontal)
