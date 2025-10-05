@@ -118,8 +118,14 @@ struct HomeTabView: View {
             CameraView { ingredients in
                 print("🔍 DEBUG: HomeTabView received \(ingredients.count) ingredients")
                 identifiedIngredients = ingredients
-                print("🔍 DEBUG: Navigating to ingredient list")
-                navigationPath.append(NavigationDestination.ingredientList)
+                print("🔍 DEBUG: Set identifiedIngredients, now deferring navigation")
+                // CRITICAL FIX: Defer navigation to next run loop
+                // This ensures identifiedIngredients has propagated before
+                // navigationDestination closure is evaluated
+                DispatchQueue.main.async {
+                    print("🔍 DEBUG: Now navigating with \(identifiedIngredients.count) ingredients")
+                    navigationPath.append(NavigationDestination.ingredientList)
+                }
             }
             .navigationTitle("FridgeScanner")
             .navigationBarTitleDisplayMode(.large)
