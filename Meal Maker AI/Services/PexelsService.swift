@@ -21,48 +21,77 @@ class PexelsService {
     // Search for a food photo based on recipe title
     func searchFoodPhoto(for recipeTitle: String) async throws -> String {
         // Extract primary food keywords from recipe title
-        let searchQuery = extractFoodKeywords(from: recipeTitle)
+        let extractedKeywords = extractFoodKeywords(from: recipeTitle)
 
-        // Try full query first
+        // If extraction returned nil, no food words found - show placeholder
+        guard let searchQuery = extractedKeywords, !searchQuery.isEmpty else {
+            throw PexelsError.noResults
+        }
+
+        // Try search with extracted food keywords only (don't add "food dish")
         if let imageURL = try? await performSearch(query: searchQuery) {
             return imageURL
         }
 
-        // Fallback to generic "food" if no results
-        if let imageURL = try? await performSearch(query: "food") {
-            return imageURL
-        }
-
+        // If no match found, show placeholder icon
         throw PexelsError.noResults
     }
 
     // Extract food-related keywords from recipe title
-    private func extractFoodKeywords(from title: String) -> String {
-        // Remove common words/phrases that aren't food-related
-        let wordsToRemove = ["recipe", "easy", "quick", "delicious", "homemade", "simple",
-                            "best", "perfect", "classic", "traditional", "gordon", "ramsay",
-                            "ramsay's", "chef", "mom's", "grandma's", "authentic"]
+    // Returns nil if no food words are detected
+    private func extractFoodKeywords(from title: String) -> String? {
+        // Common food-related words to identify main ingredient
+        let foodWords = ["pasta", "chicken", "beef", "pork", "fish", "salmon", "tuna", "shrimp",
+                        "rice", "noodles", "soup", "salad", "pizza", "burger", "sandwich",
+                        "steak", "tacos", "burrito", "curry", "stir fry", "roast", "grilled",
+                        "baked", "fried", "spaghetti", "lasagna", "risotto", "paella",
+                        "sushi", "ramen", "pho", "pie", "cake", "bread", "cookies",
+                        "vegetables", "potatoes", "beans", "lentils", "quinoa", "tofu",
+                        "eggs", "omelette", "pancakes", "waffles", "meatballs", "chili",
+                        "carbonara", "alfredo", "marinara", "pesto", "bolognese",
+                        "teriyaki", "pad thai", "penne", "fettuccine", "ravioli",
+                        "kebab", "fajitas", "enchiladas", "quesadilla", "nachos", "wings",
+                        "ribs", "bacon", "sausage", "ham", "turkey", "duck", "lamb",
+                        "shrimp", "crab", "lobster", "scallops", "oysters", "mussels",
+                        "broccoli", "spinach", "kale", "carrots", "mushrooms", "peppers",
+                        "tomato", "onion", "garlic", "ginger", "avocado", "asparagus"]
 
         var cleanTitle = title.lowercased()
 
         // Remove possessives
         cleanTitle = cleanTitle.replacingOccurrences(of: "'s", with: "")
 
-        // Remove words to remove
+        // Remove non-food descriptive words
+        let wordsToRemove = ["recipe", "easy", "quick", "delicious", "homemade", "simple",
+                            "best", "perfect", "classic", "traditional", "gordon", "ramsay",
+                            "chef", "mom", "grandma", "authentic", "amazing", "incredible",
+                            "ultimate", "favorite", "world", "famous", "style", "the", "a", "an"]
+
         for word in wordsToRemove {
-            cleanTitle = cleanTitle.replacingOccurrences(of: word, with: "")
+            cleanTitle = cleanTitle.replacingOccurrences(of: " \(word) ", with: " ")
+            cleanTitle = cleanTitle.replacingOccurrences(of: "^\(word) ", with: "", options: .regularExpression)
+            cleanTitle = cleanTitle.replacingOccurrences(of: " \(word)$", with: "", options: .regularExpression)
         }
 
         // Clean up extra spaces
         cleanTitle = cleanTitle.trimmingCharacters(in: .whitespacesAndNewlines)
         cleanTitle = cleanTitle.replacingOccurrences(of: "  ", with: " ")
 
-        // If we removed everything, use the original title
-        if cleanTitle.isEmpty {
-            return title
+        // ONLY return results if we find a known food word
+        for foodWord in foodWords {
+            if cleanTitle.contains(foodWord) {
+                // Extract the food word and surrounding context (max 3 words)
+                let words = cleanTitle.split(separator: " ")
+                if let index = words.firstIndex(where: { $0.contains(foodWord) }) {
+                    let start = max(0, index - 1)
+                    let end = min(words.count, index + 2)
+                    return words[start..<end].joined(separator: " ")
+                }
+            }
         }
 
-        return cleanTitle
+        // No food word found - return nil to show placeholder
+        return nil
     }
 
     // Perform the actual Pexels API search

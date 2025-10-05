@@ -100,17 +100,21 @@ struct ContentView: View {
                 color: .brandGreen
             ) {
                 isMenuExpanded = false
-                // Reset navigation first
-                homeNavigationPath = NavigationPath()
 
-                // If not on home tab, switch without animation to avoid visual glitch
-                if selectedTab != 0 {
-                    selectedTab = 0
-                }
+                // Disable all animations to prevent jitter
+                var transaction = Transaction()
+                transaction.disablesAnimations = true
 
-                // Navigate to camera immediately
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-                    homeNavigationPath.append(NavigationDestination.camera)
+                withTransaction(transaction) {
+                    // If not on home tab, switch instantly
+                    if selectedTab != 0 {
+                        selectedTab = 0
+                    }
+
+                    // Create and set path with camera destination
+                    var newPath = NavigationPath()
+                    newPath.append(NavigationDestination.camera)
+                    homeNavigationPath = newPath
                 }
             }
             .offset(x: -59, y: -100)

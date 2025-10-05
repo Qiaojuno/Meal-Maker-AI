@@ -25,7 +25,7 @@ struct SavedRecipesView: View {
                         Spacer()
                     }
                     .padding(.horizontal)
-                    .padding(.top, 20)
+                    .padding(.top, 50)
                     .padding(.bottom, 12)
                 }
                 .background(Color.white)

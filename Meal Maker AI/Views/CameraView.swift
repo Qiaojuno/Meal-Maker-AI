@@ -14,6 +14,7 @@ struct CameraView: View {
     @StateObject private var viewModel = CameraViewModel()
     @State private var showingPhotoPicker = false
     @State private var showingCamera = false
+    @State private var isCameraPrewarmed = false
 
     // Callback when ingredients are identified
     var onIngredientsIdentified: (([Ingredient]) -> Void)?
@@ -79,6 +80,7 @@ struct CameraView: View {
         }
         .fullScreenCover(isPresented: $showingCamera) {
             CameraCapture(image: $viewModel.capturedImage, onImageCaptured: handleImageSelected)
+                .ignoresSafeArea()
         }
         .alert("Error", isPresented: .constant(viewModel.errorMessage != nil)) {
             Button("Try Again") {
@@ -90,6 +92,41 @@ struct CameraView: View {
                 Text(errorMessage)
             }
         }
+        .onAppear {
+            // Pre-warm camera on view appear for faster response
+            if !isCameraPrewarmed {
+                Task {
+                    await prewarmCamera()
+                }
+            }
+        }
+    }
+
+    // Pre-warm camera to reduce first-launch delay
+    private func prewarmCamera() async {
+        guard AVCaptureDevice.authorizationStatus(for: .video) == .authorized else {
+            return
+        }
+
+        // Request camera access in background to initialize hardware
+        let session = AVCaptureSession()
+        session.sessionPreset = .photo
+
+        if let device = AVCaptureDevice.default(for: .video),
+           let input = try? AVCaptureDeviceInput(device: device) {
+            if session.canAddInput(input) {
+                session.addInput(input)
+            }
+        }
+
+        // Start session briefly to initialize camera hardware
+        DispatchQueue.global(qos: .userInitiated).async {
+            session.startRunning()
+            Thread.sleep(forTimeInterval: 0.1) // Brief initialization
+            session.stopRunning()
+        }
+
+        isCameraPrewarmed = true
     }
 
     // MARK: - Subviews
@@ -329,6 +366,7 @@ struct CameraCapture: UIViewControllerRepresentable {
         let picker = UIImagePickerController()
         picker.sourceType = .camera
         picker.delegate = context.coordinator
+        picker.overrideUserInterfaceStyle = .light  // Force light mode
         return picker
     }
 

@@ -9,6 +9,8 @@ import SwiftUI
 
 @main
 struct Meal_Maker_AIApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+
     init() {
         // Clean up old auto-saved recipes from previous schema
         StorageService.shared.cleanupOldRecipes()
@@ -19,5 +21,12 @@ struct Meal_Maker_AIApp: App {
             ContentView()
                 .preferredColorScheme(.light)
         }
+    }
+}
+
+// App Delegate to lock orientation to portrait only
+class AppDelegate: NSObject, UIApplicationDelegate {
+    func application(_ application: UIApplication, supportedInterfaceOrientationsFor window: UIWindow?) -> UIInterfaceOrientationMask {
+        return .portrait  // Lock to portrait mode only
     }
 }
