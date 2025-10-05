@@ -43,7 +43,7 @@ struct RecipeDetailView: View {
                         }
                         .padding(.trailing, 16)
                     }
-                    .padding(.top, 8)
+                    .padding(.top, 16)
                 }
 
                 VStack(alignment: .leading, spacing: 24) {
