@@ -30,6 +30,7 @@ iOS app that scans your fridge and generates recipes using AI.
 ## 📚 Documentation
 
 - **[SECURITY.md](SECURITY.md)** - ⚠️ **READ THIS FIRST** - Security considerations and production migration
+- **[SWIFTUI_BEST_PRACTICES.md](SWIFTUI_BEST_PRACTICES.md)** - 🎓 SwiftUI patterns & race condition debugging
 - **[COMPLETE_SETUP_GUIDE.md](Meal%20Maker%20AI/COMPLETE_SETUP_GUIDE.md)** - Full setup instructions, troubleshooting
 - **[CHANGES_LOG.md](CHANGES_LOG.md)** - All changes made this session
 - **[ARCHITECTURE.md](Meal%20Maker%20AI/ARCHITECTURE.md)** - Original architecture plan
