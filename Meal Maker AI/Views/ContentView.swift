@@ -16,18 +16,25 @@ struct ContentView: View {
     @State private var selectedTab = 0
     @State private var showAddSheet = false
     @State private var isMenuExpanded = false
+    @State private var homeNavigationPath = NavigationPath() // Manage home navigation
 
     var body: some View {
         ZStack(alignment: .bottom) {
             // Layer 1: Main content (blurred when expanded)
             Group {
                 TabView(selection: $selectedTab) {
-                    HomeTabView().tag(0)
+                    HomeTabView(navigationPath: $homeNavigationPath).tag(0)
                     SavedRecipesView().tag(1)
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
 
-                CustomNavBar(selectedTab: $selectedTab, showAddSheet: $showAddSheet, isExpanded: $isMenuExpanded)
+                CustomNavBar(
+                    selectedTab: $selectedTab,
+                    showAddSheet: $showAddSheet,
+                    isExpanded: $isMenuExpanded,
+                    homeNavigationPath: $homeNavigationPath,
+                    showToggleButton: false  // Don't show toggle button in blurred layer
+                )
             }
             .blur(radius: isMenuExpanded ? 5 : 0)
             .animation(.easeOut(duration: 0.25), value: isMenuExpanded)
@@ -36,13 +43,21 @@ struct ContentView: View {
             if isMenuExpanded {
                 Color.black.opacity(0.5)
                     .edgesIgnoringSafeArea(.all)
+                    .onTapGesture {
+                        withAnimation(.easeInOut(duration: 0.4)) {
+                            isMenuExpanded = false
+                        }
+                    }
                     .animation(.easeOut(duration: 0.25), value: isMenuExpanded)
             }
 
-            // Layer 3: The 3 buttons (always sharp, on top of everything)
+            // Layer 3: Radial menu buttons (always sharp, on top)
             if isMenuExpanded {
                 radialMenuButtons
             }
+
+            // Layer 4: Toggle button (always on top, never blurred)
+            toggleButton
         }
         .sheet(isPresented: $showAddSheet) {
             NavigationView {
@@ -59,20 +74,20 @@ struct ContentView: View {
 
     private var radialMenuButtons: some View {
         ZStack(alignment: .bottomTrailing) {
-            // Find Recipes button
+            // Saved Recipes button (changed from "Find Recipes")
             RadialMenuButton(
-                icon: "magnifyingglass",
-                label: "Find Recipes",
+                icon: "bookmark.fill",
+                label: "Saved Recipes",
                 color: .brandGreen
             ) {
                 withAnimation {
                     isMenuExpanded = false
-                    selectedTab = 1
+                    selectedTab = 1 // Navigate to SavedRecipesView
                 }
             }
             .offset(x: -59, y: -180)
 
-            // Update Fridge button
+            // Update Fridge button (navigate to camera)
             RadialMenuButton(
                 icon: "camera.fill",
                 label: "Update Fridge",
@@ -80,38 +95,50 @@ struct ContentView: View {
             ) {
                 withAnimation {
                     isMenuExpanded = false
-                    selectedTab = 0
+                    selectedTab = 0 // Switch to home tab
+                    homeNavigationPath = NavigationPath() // Reset navigation
+                    // Navigate to camera
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        homeNavigationPath.append(NavigationDestination.camera)
+                    }
                 }
             }
             .offset(x: -59, y: -100)
-
-            // X Button (appears on top of + button in bottom-right)
-            HStack(spacing: 0) {
-                Spacer()
-                Spacer()
-                Spacer()
-
-                Button {
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                        isMenuExpanded.toggle()
-                    }
-                } label: {
-                    Circle()
-                        .fill(.white)
-                        .frame(width: 90, height: 90)
-                        .overlay(
-                            Image(systemName: "xmark")
-                                .font(.title2)
-                                .fontWeight(.semibold)
-                                .foregroundColor(.black)
-                                .rotationEffect(.degrees(90))
-                        )
-                }
-                .offset(y: -30)
-            }
-            .padding(.horizontal, 40)
-            .padding(.bottom, -40)
         }
+    }
+
+    private var toggleButton: some View {
+        HStack(spacing: 0) {
+            Spacer()
+            Spacer()
+            Spacer()
+
+            Button {
+                // Haptic feedback
+                let impact = UIImpactFeedbackGenerator(style: .medium)
+                impact.impactOccurred()
+
+                withAnimation(.easeInOut(duration: 0.4)) {
+                    isMenuExpanded.toggle()
+                }
+            } label: {
+                Circle()
+                    .fill(isMenuExpanded ? Color.white : Color.brandGreen)
+                    .frame(width: 90, height: 90)
+                    .overlay(
+                        Image(systemName: isMenuExpanded ? "xmark" : "plus")
+                            .font(.title2)
+                            .fontWeight(.semibold)
+                            .foregroundColor(isMenuExpanded ? .black : .white)
+                            .rotationEffect(.degrees(isMenuExpanded ? 90 : 0))
+                    )
+                    .shadow(color: .black.opacity(0.2), radius: 8, y: 4)
+            }
+            .offset(y: -30)
+        }
+        .padding(.horizontal, 40)
+        .padding(.top, 12)
+        .padding(.bottom, -40)
     }
 }
 
@@ -121,6 +148,8 @@ struct CustomNavBar: View {
     @Binding var selectedTab: Int
     @Binding var showAddSheet: Bool
     @Binding var isExpanded: Bool
+    @Binding var homeNavigationPath: NavigationPath
+    var showToggleButton: Bool = true  // Default to true for compatibility
 
     var body: some View {
         ZStack {
@@ -134,6 +163,8 @@ struct CustomNavBar: View {
         HStack(spacing: 0) {
             NavButton(icon: "house.fill", isSelected: selectedTab == 0) {
                 selectedTab = 0
+                // Clear navigation to return to camera root
+                homeNavigationPath = NavigationPath()
             }
             .offset(x: 25, y: -15)
 
@@ -146,30 +177,16 @@ struct CustomNavBar: View {
 
             Spacer()
 
-            toggleButton
+            // Placeholder spacer when toggle button is hidden
+            if !showToggleButton {
+                Color.clear
+                    .frame(width: 90, height: 90)
+                    .offset(y: -30)
+            }
         }
         .padding(.horizontal, 40)
         .padding(.top, 12)
         .padding(.bottom, -40)
-    }
-
-    private var toggleButton: some View {
-        Button {
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                isExpanded.toggle()
-            }
-        } label: {
-            Circle()
-                .fill(Color.brandGreen)
-                .frame(width: 90, height: 90)
-                .overlay(
-                    Image(systemName: "plus")
-                        .font(.title2)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.white)
-                )
-        }
-        .offset(y: -30)
     }
 }
 
@@ -222,34 +239,38 @@ struct NavButton: View {
 // MARK: - Home Tab View
 
 struct HomeTabView: View {
-    @State private var navigationPath = NavigationPath()
+    @Binding var navigationPath: NavigationPath
     @State private var identifiedIngredients: [Ingredient] = []
 
     var body: some View {
         NavigationStack(path: $navigationPath) {
-            CameraView { ingredients in
-                identifiedIngredients = ingredients
-                navigationPath.append(NavigationDestination.ingredientList(ingredients))
-            }
-            .navigationTitle("FridgeScanner")
-            .navigationBarTitleDisplayMode(.large)
-            .navigationDestination(for: NavigationDestination.self) { destination in
-                switch destination {
-                case .ingredientList(let ingredients):
-                    IngredientListView(
-                        ingredients: ingredients,
-                        onConfirm: { confirmedIngredients in
-                            identifiedIngredients = confirmedIngredients
-                            navigationPath.append(NavigationDestination.recipeGeneration(confirmedIngredients))
-                        },
-                        onRescan: {
-                            navigationPath.removeLast()
+            // HomeScreen is the root view
+            HomeScreen(navigationPath: $navigationPath)
+                .navigationBarHidden(true)
+                .navigationDestination(for: NavigationDestination.self) { destination in
+                    switch destination {
+                    case .camera:
+                        CameraView { ingredients in
+                            identifiedIngredients = ingredients
+                            navigationPath.append(NavigationDestination.ingredientList(ingredients))
                         }
-                    )
-                case .recipeGeneration(let ingredients):
-                    RecipeGenerationView(ingredients: ingredients)
+                    case .ingredientList(let ingredients):
+                        IngredientListView(
+                            ingredients: ingredients,
+                            onConfirm: { confirmedIngredients in
+                                identifiedIngredients = confirmedIngredients
+                                navigationPath.append(NavigationDestination.recipeGeneration(confirmedIngredients))
+                            },
+                            onRescan: {
+                                navigationPath.removeLast()
+                            }
+                        )
+                    case .recipeGeneration(let ingredients):
+                        RecipeGenerationView(ingredients: ingredients)
+                    case .recipeDetail(let recipe):
+                        RecipeDetailView(recipe: recipe)
+                    }
                 }
-            }
         }
     }
 }
@@ -257,14 +278,22 @@ struct HomeTabView: View {
 // MARK: - Navigation Destination
 
 enum NavigationDestination: Hashable {
+    case camera
     case ingredientList([Ingredient])
     case recipeGeneration([Ingredient])
+    case recipeDetail(Recipe)
 }
 
 #if DEBUG
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
+    }
+}
+
+struct HomeTabView_Previews: PreviewProvider {
+    static var previews: some View {
+        HomeTabView(navigationPath: .constant(NavigationPath()))
     }
 }
 #endif

@@ -20,22 +20,19 @@ struct CameraView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Title bar (matching home screen with back button)
+            // Title bar with back button
             VStack(spacing: 0) {
                 HStack {
-                    // Back button
-                    Button(action: {
-                        dismiss()
-                    }) {
+                    Button(action: { dismiss() }) {
                         Image(systemName: "chevron.left")
-                            .font(.title2)
+                            .font(.title3)
                             .fontWeight(.semibold)
-                            .foregroundColor(Color(red: 74/255, green: 93/255, blue: 74/255)) // Green
-                            .padding(.trailing, 8)
+                            .foregroundColor(.black)
+                            .padding(8)
                     }
 
                     Text("Scan Fridge")
-                        .font(.title)
+                        .font(.largeTitle)
                         .fontWeight(.bold)
                         .foregroundColor(.black)
 
