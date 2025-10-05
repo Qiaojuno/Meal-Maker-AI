@@ -12,6 +12,8 @@ struct RecipeDetailView: View {
     let recipe: Recipe
     @StateObject private var viewModel: RecipeViewModel
     @State private var isSaved: Bool = false
+    @State private var imageURL: String? = nil
+    @State private var isLoadingImage = false
 
     init(recipe: Recipe, viewModel: RecipeViewModel? = nil) {
         self.recipe = recipe
@@ -70,13 +72,25 @@ struct RecipeDetailView: View {
         .onAppear {
             isSaved = viewModel.isRecipeSaved(recipe.id)
         }
+        .task {
+            // Lazy load image when view appears
+            if imageURL == nil && !isLoadingImage {
+                isLoadingImage = true
+                if let existingURL = recipe.imageURL {
+                    imageURL = existingURL
+                } else {
+                    imageURL = await viewModel.fetchImageIfNeeded(for: recipe)
+                }
+                isLoadingImage = false
+            }
+        }
     }
 
     // MARK: - Subviews
 
     private var heroImage: some View {
         GeometryReader { geometry in
-            if let imageURL = recipe.imageURL, let url = URL(string: imageURL) {
+            if let url = imageURL.flatMap({ URL(string: $0) }) {
                 AsyncImage(url: url) { phase in
                     switch phase {
                     case .empty:

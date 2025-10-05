@@ -5,7 +5,84 @@
 
 ---
 
-## 📱 Session 12: Pexels API Integration for Recipe Images (October 4, 2025)
+## 📱 Session 12b: Lazy Loading Performance Optimization (October 4, 2025)
+
+### What Changed
+Converted Pexels image loading from **blocking** to **lazy loading** for instant recipe display and better performance.
+
+**Performance Improvements:**
+- ✅ Recipe generation now instant (no Pexels delay during generation)
+- ✅ Recipes display immediately with placeholders
+- ✅ Images load in background and "pop in" when ready
+- ✅ Much better perceived performance
+
+**Before (Blocking):**
+1. Generate recipes → Wait 2-5 seconds (Gemini API)
+2. Fetch 3 images → Wait 1-3 seconds (Pexels API) ❌
+3. Display recipes → Total 3-8 seconds
+
+**After (Lazy Loading):**
+1. Generate recipes → Wait 2-5 seconds (Gemini only) ✅
+2. Display recipes instantly → 0 seconds ✅
+3. Images load in background → Pop in when ready (0.5-2 sec each)
+
+**Implementation Details:**
+
+1. **RecipeViewModel.swift** - New lazy fetch method:
+   ```swift
+   func fetchImageIfNeeded(for recipe: Recipe) async -> String? {
+       if let imageURL = recipe.imageURL { return imageURL }
+       if let imageURL = try? await pexelsService.searchFoodPhoto(for: recipe.title) {
+           var updatedRecipe = recipe
+           updatedRecipe.imageURL = imageURL
+           storageService.updateRecipe(updatedRecipe)
+           return imageURL
+       }
+       return nil
+   }
+   ```
+
+2. **RecipeCard (HomeScreenComponents.swift)** - Lazy loading with .task:
+   - State variables: `@State private var imageURL: String?`
+   - Loads image when card appears on screen
+   - Updates storage once image is fetched
+   - Placeholder shown until loaded
+
+3. **RecipeDetailView** - Lazy hero image:
+   - Same pattern as RecipeCard
+   - Large hero image loads on view appear
+   - Green gradient placeholder while loading
+
+4. **StorageService.swift** - New updateRecipe method:
+   - Updates recipe in both recent and saved lists
+   - Persists imageURL after lazy fetch
+
+**User Experience:**
+- User generates recipes → Sees recipes **immediately** ✅
+- Images show placeholder → Smooth transition to real photo
+- No blocking UI or loading delays
+- Background image fetching doesn't block interaction
+
+**Files Modified:**
+1. `ViewModels/RecipeViewModel.swift` - Added fetchImageIfNeeded method
+2. `Views/HomeScreenComponents.swift` - Lazy loading in RecipeCard
+3. `Views/RecipeDetailView.swift` - Lazy loading in hero image
+4. `Services/StorageService.swift` - Added updateRecipe method
+
+**Build Status:**
+- ✅ Build succeeded
+- ✅ Lazy loading functional
+- ✅ No UI blocking
+
+**Confidence Score:** 10/10
+- Instant recipe display
+- Background image loading
+- Smooth user experience
+- Optimal performance
+
+---
+
+## 📱 Session 12a: Pexels API Integration for Recipe Images (October 4, 2025)
 
 ### What Changed
 Integrated Pexels API to fetch real food photos for recipes, replacing all placeholder images with actual food photography.

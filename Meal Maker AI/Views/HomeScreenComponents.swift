@@ -119,11 +119,14 @@ struct RecipeCard: View {
     let recipe: Recipe
     let action: () -> Void
 
+    @State private var imageURL: String? = nil
+    @State private var isLoadingImage = false
+
     var body: some View {
         Button(action: action) {
             HStack(spacing: 12) {
-                // Recipe image
-                if let imageURL = recipe.imageURL, let url = URL(string: imageURL) {
+                // Recipe image (lazy loaded)
+                if let url = imageURL.flatMap({ URL(string: $0) }) {
                     AsyncImage(url: url) { phase in
                         switch phase {
                         case .empty:
@@ -139,28 +142,14 @@ struct RecipeCard: View {
                                 .clipShape(RoundedRectangle(cornerRadius: 8))
                         case .failure(_):
                             // Error state - show placeholder
-                            RoundedRectangle(cornerRadius: 8)
-                                .fill(Color.gray)
-                                .frame(width: 80, height: 80)
-                                .overlay(
-                                    Image(systemName: "fork.knife")
-                                        .font(.custom("Archivo-Regular", size: 22))
-                                        .foregroundColor(.white)
-                                )
+                            placeholderImage
                         @unknown default:
-                            EmptyView()
+                            placeholderImage
                         }
                     }
                 } else {
-                    // No image URL - show placeholder
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(Color.gray)
-                        .frame(width: 80, height: 80)
-                        .overlay(
-                            Image(systemName: "fork.knife")
-                                .font(.custom("Archivo-Regular", size: 22))
-                                .foregroundColor(.white)
-                        )
+                    // No image URL yet - show placeholder
+                    placeholderImage
                 }
 
                 // Recipe details
@@ -197,6 +186,29 @@ struct RecipeCard: View {
             .shadow(color: .black.opacity(0.1), radius: 4, y: 2)
         }
         .buttonStyle(PlainButtonStyle())
+        .task {
+            // Lazy load image when card appears
+            if imageURL == nil && !isLoadingImage {
+                isLoadingImage = true
+                if let existingURL = recipe.imageURL {
+                    imageURL = existingURL
+                } else {
+                    imageURL = await RecipeViewModel().fetchImageIfNeeded(for: recipe)
+                }
+                isLoadingImage = false
+            }
+        }
+    }
+
+    private var placeholderImage: some View {
+        RoundedRectangle(cornerRadius: 8)
+            .fill(Color.gray)
+            .frame(width: 80, height: 80)
+            .overlay(
+                Image(systemName: "fork.knife")
+                    .font(.custom("Archivo-Regular", size: 22))
+                    .foregroundColor(.white)
+            )
     }
 }
 

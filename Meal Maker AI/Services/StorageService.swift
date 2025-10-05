@@ -203,6 +203,24 @@ class StorageService {
         saveRecentRecipes(Array(allRecent.prefix(10)))
     }
 
+    /// Update a recipe in both recent and saved lists
+    /// - Parameter recipe: Updated recipe
+    func updateRecipe(_ recipe: Recipe) {
+        // Update in recent recipes if exists
+        var recentRecipes = getRecentRecipes()
+        if let index = recentRecipes.firstIndex(where: { $0.id == recipe.id }) {
+            recentRecipes[index] = recipe
+            saveRecentRecipes(recentRecipes)
+        }
+
+        // Update in saved recipes if exists
+        var savedRecipes = getSavedRecipes()
+        if let index = savedRecipes.firstIndex(where: { $0.id == recipe.id }) {
+            savedRecipes[index] = recipe
+            persist(recipes: savedRecipes)
+        }
+    }
+
     // MARK: - Private Methods
 
     /// Persist recipes array to UserDefaults

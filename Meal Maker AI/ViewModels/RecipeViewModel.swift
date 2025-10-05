@@ -30,16 +30,9 @@ class RecipeViewModel: ObservableObject {
         isGenerating = true
 
         do {
-            var recipes = try await geminiService.generateRecipes(from: ingredients)
+            let recipes = try await geminiService.generateRecipes(from: ingredients)
 
-            // Fetch images for each recipe
-            for index in recipes.indices {
-                if let imageURL = try? await pexelsService.searchFoodPhoto(for: recipes[index].title) {
-                    recipes[index].imageURL = imageURL
-                }
-                // If image fetch fails, recipe.imageURL remains nil (will show placeholder)
-            }
-
+            // Images will be loaded lazily when displayed (no Pexels call here)
             generatedRecipes = recipes
 
             // Add to recent recipes list (for home screen display)
@@ -76,6 +69,25 @@ class RecipeViewModel: ObservableObject {
     /// Check if a recipe is saved
     func isRecipeSaved(_ recipeId: UUID) -> Bool {
         return storageService.isRecipeSaved(recipeId: recipeId)
+    }
+
+    /// Fetch image for a recipe (lazy loading)
+    func fetchImageIfNeeded(for recipe: Recipe) async -> String? {
+        // If recipe already has an image URL, return it
+        if let imageURL = recipe.imageURL {
+            return imageURL
+        }
+
+        // Otherwise, fetch from Pexels
+        if let imageURL = try? await pexelsService.searchFoodPhoto(for: recipe.title) {
+            // Update the recipe in storage with the new image URL
+            var updatedRecipe = recipe
+            updatedRecipe.imageURL = imageURL
+            storageService.updateRecipe(updatedRecipe)
+            return imageURL
+        }
+
+        return nil
     }
 
     /// Reset state
