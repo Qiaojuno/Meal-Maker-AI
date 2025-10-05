@@ -81,14 +81,22 @@ struct ContentView: View {
                 label: "Generate Recipes",
                 color: .brandGreen
             ) {
+                // Haptic feedback
+                let impact = UIImpactFeedbackGenerator(style: .medium)
+                impact.impactOccurred()
+
                 withAnimation {
                     isMenuExpanded = false
                     selectedTab = 0 // Switch to home tab
                     homeNavigationPath = NavigationPath() // Reset navigation to home
-                    // Trigger recipe generation on HomeViewModel
-                    Task {
-                        await homeViewModel.generateNewRecipes()
-                    }
+                }
+
+                // Set loading immediately for instant feedback
+                homeViewModel.isLoading = true
+
+                // Trigger recipe generation on HomeViewModel
+                Task {
+                    await homeViewModel.generateNewRecipes()
                 }
             }
             .offset(x: -59, y: -180)
@@ -274,8 +282,17 @@ struct HomeTabView: View {
                                 identifiedIngredients = confirmedIngredients
                                 // Save ingredients
                                 StorageService.shared.saveIngredients(confirmedIngredients)
+
+                                // Haptic feedback
+                                let impact = UIImpactFeedbackGenerator(style: .medium)
+                                impact.impactOccurred()
+
                                 // Go back to home
                                 navigationPath.removeLast()
+
+                                // Set loading immediately for instant visual feedback
+                                viewModel.isLoading = true
+
                                 // Auto-generate recipes from scanned ingredients
                                 Task {
                                     await viewModel.generateNewRecipes()
