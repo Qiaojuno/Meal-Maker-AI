@@ -17,6 +17,7 @@ struct Recipe: Identifiable, Codable, Hashable {
     let servings: Int?  // Number of servings
     var createdAt: Date = Date()
     var isSaved: Bool = false
+    var imageURL: String?  // Pexels photo URL
 
     // Custom coding keys for JSON mapping (API uses different names)
     enum CodingKeys: String, CodingKey {
@@ -29,6 +30,7 @@ struct Recipe: Identifiable, Codable, Hashable {
         case servings
         case createdAt
         case isSaved
+        case imageURL
     }
 
     // Custom initializer
@@ -41,7 +43,8 @@ struct Recipe: Identifiable, Codable, Hashable {
         difficulty: String? = nil,
         servings: Int? = nil,
         createdAt: Date = Date(),
-        isSaved: Bool = false
+        isSaved: Bool = false,
+        imageURL: String? = nil
     ) {
         self.id = id
         self.title = title
@@ -52,6 +55,7 @@ struct Recipe: Identifiable, Codable, Hashable {
         self.servings = servings
         self.createdAt = createdAt
         self.isSaved = isSaved
+        self.imageURL = imageURL
     }
 
     // Custom decoder to handle API response format
@@ -74,5 +78,6 @@ struct Recipe: Identifiable, Codable, Hashable {
         self.servings = try? container.decode(Int.self, forKey: .servings)
         self.createdAt = (try? container.decode(Date.self, forKey: .createdAt)) ?? Date()
         self.isSaved = (try? container.decode(Bool.self, forKey: .isSaved)) ?? false
+        self.imageURL = try? container.decode(String.self, forKey: .imageURL)
     }
 }

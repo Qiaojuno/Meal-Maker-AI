@@ -122,15 +122,46 @@ struct RecipeCard: View {
     var body: some View {
         Button(action: action) {
             HStack(spacing: 12) {
-                // Recipe image placeholder
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(Color.gray)
-                    .frame(width: 80, height: 80)
-                    .overlay(
-                        Image(systemName: "fork.knife")
-                            .font(.custom("Archivo-Regular", size: 22))
-                            .foregroundColor(.white)
-                    )
+                // Recipe image
+                if let imageURL = recipe.imageURL, let url = URL(string: imageURL) {
+                    AsyncImage(url: url) { phase in
+                        switch phase {
+                        case .empty:
+                            // Loading state
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(Color.gray.opacity(0.3))
+                                .frame(width: 80, height: 80)
+                        case .success(let image):
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                                .frame(width: 80, height: 80)
+                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                        case .failure(_):
+                            // Error state - show placeholder
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(Color.gray)
+                                .frame(width: 80, height: 80)
+                                .overlay(
+                                    Image(systemName: "fork.knife")
+                                        .font(.custom("Archivo-Regular", size: 22))
+                                        .foregroundColor(.white)
+                                )
+                        @unknown default:
+                            EmptyView()
+                        }
+                    }
+                } else {
+                    // No image URL - show placeholder
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color.gray)
+                        .frame(width: 80, height: 80)
+                        .overlay(
+                            Image(systemName: "fork.knife")
+                                .font(.custom("Archivo-Regular", size: 22))
+                                .foregroundColor(.white)
+                        )
+                }
 
                 // Recipe details
                 VStack(alignment: .leading, spacing: 6) {

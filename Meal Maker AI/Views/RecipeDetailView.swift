@@ -76,23 +76,63 @@ struct RecipeDetailView: View {
 
     private var heroImage: some View {
         GeometryReader { geometry in
-            Rectangle()
-                .fill(
-                    LinearGradient(
-                        colors: [
-                            Color(red: 90/255, green: 122/255, blue: 90/255),
-                            Color(red: 74/255, green: 93/255, blue: 74/255)
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
+            if let imageURL = recipe.imageURL, let url = URL(string: imageURL) {
+                AsyncImage(url: url) { phase in
+                    switch phase {
+                    case .empty:
+                        // Loading state
+                        Rectangle()
+                            .fill(Color.gray.opacity(0.3))
+                            .frame(width: geometry.size.width)
+                    case .success(let image):
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(width: geometry.size.width, height: 350)
+                            .clipped()
+                    case .failure(_):
+                        // Error state - show gradient placeholder
+                        Rectangle()
+                            .fill(
+                                LinearGradient(
+                                    colors: [
+                                        Color(red: 90/255, green: 122/255, blue: 90/255),
+                                        Color(red: 74/255, green: 93/255, blue: 74/255)
+                                    ],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                            .overlay(
+                                Image(systemName: "fork.knife")
+                                    .font(.custom("Archivo-Regular", size: 80))
+                                    .foregroundColor(.white.opacity(0.5))
+                            )
+                            .frame(width: geometry.size.width)
+                    @unknown default:
+                        EmptyView()
+                    }
+                }
+            } else {
+                // No image URL - show gradient placeholder
+                Rectangle()
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                Color(red: 90/255, green: 122/255, blue: 90/255),
+                                Color(red: 74/255, green: 93/255, blue: 74/255)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
                     )
-                )
-                .overlay(
-                    Image(systemName: "fork.knife")
-                        .font(.custom("Archivo-Regular", size: 80))
-                        .foregroundColor(.white.opacity(0.5))
-                )
-                .frame(width: geometry.size.width)
+                    .overlay(
+                        Image(systemName: "fork.knife")
+                            .font(.custom("Archivo-Regular", size: 80))
+                            .foregroundColor(.white.opacity(0.5))
+                    )
+                    .frame(width: geometry.size.width)
+            }
         }
         .frame(height: 350)
         .edgesIgnoringSafeArea(.horizontal)

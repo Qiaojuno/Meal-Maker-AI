@@ -5,6 +5,90 @@
 
 ---
 
+## 📱 Session 12: Pexels API Integration for Recipe Images (October 4, 2025)
+
+### What Changed
+Integrated Pexels API to fetch real food photos for recipes, replacing all placeholder images with actual food photography.
+
+**Features Implemented:**
+- ✅ Real food photos for all recipes (Home, Saved, Detail views)
+- ✅ Smart keyword extraction from recipe titles
+- ✅ Automatic fallback to placeholders when API fails
+- ✅ Image caching via URL storage (no file downloads)
+- ✅ AsyncImage with loading states
+
+**Files Created:**
+1. `Services/PexelsService.swift` (new) - Complete Pexels API integration
+   - API endpoint: `https://api.pexels.com/v1/search`
+   - Keyword extraction algorithm (removes celebrity names, adjectives)
+   - Fallback logic: full title → cleaned keywords → "food"
+   - Error handling for network failures
+
+**Files Modified:**
+1. `Models/Recipe.swift` - Added `imageURL: String?` property
+   - Updated CodingKeys enum
+   - Updated custom initializer
+   - Updated custom decoder
+
+2. `Views/HomeScreenComponents.swift` - RecipeCard AsyncImage
+   - Shows real photos when available (80x80, aspect fill)
+   - Loading state: light gray rectangle
+   - Error/no URL: fork.knife icon placeholder
+
+3. `Views/RecipeDetailView.swift` - Hero image AsyncImage
+   - Shows real photos when available (350px height, full width)
+   - Loading state: light gray rectangle
+   - Error/no URL: green gradient with fork.knife icon
+
+4. `ViewModels/RecipeViewModel.swift` - Image fetching integration
+   - Fetches Pexels image for each recipe after generation
+   - Runs in parallel with recipe generation
+   - Graceful failure (nil imageURL if fetch fails)
+
+**Pexels API Details:**
+- API Key: `ee1AgRWUaXqDy94EDQ0MIFvwCq0xPxhp1MFpj24DQZ3ZZsRObQwLzRgs`
+- Rate Limit: 200 requests/hour (can request unlimited)
+- Image size used: `medium` (optimal for mobile)
+- Attribution: Optional (not required)
+
+**Image Flow:**
+1. User generates recipes → Gemini API returns recipe data
+2. For each recipe, PexelsService searches for food photo
+3. imageURL attached to Recipe object
+4. Recipe saved to UserDefaults with imageURL
+5. AsyncImage displays photo or fallback placeholder
+
+**Technical Implementation:**
+```swift
+// Recipe Model - Added imageURL
+var imageURL: String?  // Pexels photo URL
+
+// Keyword Extraction
+"Gordon Ramsay's Penne Pasta" → "penne pasta"
+Removes: celebrity names, possessives, adjectives
+
+// AsyncImage in RecipeCard
+AsyncImage(url: URL(string: imageURL)) { phase in
+    case .empty: // Loading
+    case .success(let image): // Display
+    case .failure: // Placeholder
+}
+```
+
+**Build Status:**
+- ✅ Build succeeded
+- ✅ All image locations updated
+- ✅ Fallback logic tested
+- ✅ No breaking changes
+
+**Confidence Score:** 10/10
+- Complete Pexels integration
+- Smart keyword matching
+- Robust error handling
+- Seamless UI integration
+
+---
+
 ## 📱 Session 11: Recipe Detail Padding Fixes & Home Screen Ingredients Section (October 4, 2025)
 
 ### What Changed

@@ -19,6 +19,7 @@ class RecipeViewModel: ObservableObject {
 
     private let geminiService = GeminiService()
     private let storageService = StorageService.shared
+    private let pexelsService = PexelsService()
 
     // MARK: - Public Methods
 
@@ -29,7 +30,16 @@ class RecipeViewModel: ObservableObject {
         isGenerating = true
 
         do {
-            let recipes = try await geminiService.generateRecipes(from: ingredients)
+            var recipes = try await geminiService.generateRecipes(from: ingredients)
+
+            // Fetch images for each recipe
+            for index in recipes.indices {
+                if let imageURL = try? await pexelsService.searchFoodPhoto(for: recipes[index].title) {
+                    recipes[index].imageURL = imageURL
+                }
+                // If image fetch fails, recipe.imageURL remains nil (will show placeholder)
+            }
+
             generatedRecipes = recipes
 
             // Add to recent recipes list (for home screen display)
