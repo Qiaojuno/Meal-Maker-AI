@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct IngredientListView: View {
-    @State var ingredients: [Ingredient]
+    @State private var ingredients: [Ingredient]
     @State private var showingAddIngredient = false
     @State private var newIngredientName = ""
     @State private var newIngredientQuantity = ""
@@ -16,6 +16,23 @@ struct IngredientListView: View {
     // Callback when user confirms ingredients
     var onConfirm: (([Ingredient]) -> Void)?
     var onRescan: (() -> Void)?
+
+    // CRITICAL FIX: Proper initializer for @State with external parameter
+    init(
+        ingredients: [Ingredient],
+        onConfirm: (([Ingredient]) -> Void)? = nil,
+        onRescan: (() -> Void)? = nil
+    ) {
+        print("🔍 DEBUG: IngredientListView.init() called with \(ingredients.count) ingredients")
+        ingredients.forEach { ingredient in
+            print("  📦 init: \(ingredient.name)")
+        }
+        // Use _ingredients to set the @State wrapper's initial value
+        self._ingredients = State(initialValue: ingredients)
+        print("🔍 DEBUG: _ingredients State wrapper initialized")
+        self.onConfirm = onConfirm
+        self.onRescan = onRescan
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -35,12 +52,19 @@ struct IngredientListView: View {
         .sheet(isPresented: $showingAddIngredient) {
             addIngredientSheet
         }
+        .onAppear {
+            print("🔍 DEBUG: IngredientListView appeared with \(ingredients.count) ingredients")
+            ingredients.forEach { ingredient in
+                print("  - \(ingredient.name)")
+            }
+        }
     }
 
     // MARK: - Subviews
 
     private var headerView: some View {
-        VStack(spacing: 8) {
+        let _ = print("🔍 DEBUG: headerView rendering with \(ingredients.count) ingredients")
+        return VStack(spacing: 8) {
             Text("Review Ingredients")
                 .font(.title2)
                 .fontWeight(.bold)

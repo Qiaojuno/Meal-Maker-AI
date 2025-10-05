@@ -186,27 +186,34 @@ struct HomeTabView: View {
     var body: some View {
         NavigationStack(path: $navigationPath) {
             CameraView { ingredients in
+                print("🔍 DEBUG: HomeTabView received \(ingredients.count) ingredients")
                 identifiedIngredients = ingredients
-                navigationPath.append(NavigationDestination.ingredientList)
+                print("🔍 DEBUG: Navigating with ingredients passed through enum")
+                // CRITICAL FIX: Pass ingredients THROUGH the navigation destination
+                // Don't rely on captured state from closure
+                navigationPath.append(NavigationDestination.ingredientList(ingredients))
             }
             .navigationTitle("FridgeScanner")
             .navigationBarTitleDisplayMode(.large)
             .navigationDestination(for: NavigationDestination.self) { destination in
                 switch destination {
-                case .ingredientList:
+                case .ingredientList(let ingredients):
+                    let _ = print("🔍 DEBUG: Creating IngredientListView with \(ingredients.count) ingredients from enum")
                     IngredientListView(
-                        ingredients: identifiedIngredients,
+                        ingredients: ingredients,
                         onConfirm: { confirmedIngredients in
+                            print("🔍 DEBUG: User confirmed \(confirmedIngredients.count) ingredients")
                             identifiedIngredients = confirmedIngredients
-                            navigationPath.append(NavigationDestination.recipeGeneration)
+                            navigationPath.append(NavigationDestination.recipeGeneration(confirmedIngredients))
                         },
                         onRescan: {
-                            navigationPath.removeLast()
+                            print("🔍 DEBUG: User requested rescan")
+                            navigationPath.removeLast()  // Go back to camera
                         }
                     )
 
-                case .recipeGeneration:
-                    RecipeGenerationView(ingredients: identifiedIngredients)
+                case .recipeGeneration(let ingredients):
+                    RecipeGenerationView(ingredients: ingredients)
                 }
             }
         }
@@ -216,8 +223,8 @@ struct HomeTabView: View {
 // MARK: - Navigation Destination
 
 enum NavigationDestination: Hashable {
-    case ingredientList
-    case recipeGeneration
+    case ingredientList([Ingredient])  // Pass ingredients directly!
+    case recipeGeneration([Ingredient])  // Pass ingredients directly!
 }
 
 #if DEBUG

@@ -131,7 +131,14 @@ struct CameraView: View {
                 .fontWeight(.bold)
                 .foregroundColor(.white)
 
-            Button(action: proceedToIngredients) {
+            Button {
+                // Fix: Use DispatchQueue to ensure state is fully propagated
+                // This prevents race condition where button click happens
+                // before @Published property updates the view
+                DispatchQueue.main.async {
+                    proceedToIngredients()
+                }
+            } label: {
                 Text("Review Ingredients")
                     .font(.headline)
                     .foregroundColor(.black)
@@ -161,6 +168,10 @@ struct CameraView: View {
     }
 
     private func proceedToIngredients() {
+        print("🔍 DEBUG: Proceeding with \(viewModel.identifiedIngredients.count) ingredients")
+        viewModel.identifiedIngredients.forEach { ingredient in
+            print("  - \(ingredient.name) (\(ingredient.quantity ?? "no quantity"))")
+        }
         onIngredientsIdentified?(viewModel.identifiedIngredients)
     }
 }
