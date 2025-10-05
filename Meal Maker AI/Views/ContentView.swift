@@ -48,46 +48,116 @@ struct ContentView: View {
 struct CustomNavBar: View {
     @Binding var selectedTab: Int
     @Binding var showAddSheet: Bool
+    @State private var isExpanded = false // 👈 New state for radial menu
     
     var body: some View {
-        HStack(spacing: 0) {
-            // Home button
-            NavButton(icon: "house.fill", isSelected: selectedTab == 0) {
-                selectedTab = 0
+        ZStack {
+            HStack(spacing: 0) {
+                // Home button
+                NavButton(icon: "house.fill", isSelected: selectedTab == 0) {
+                    selectedTab = 0
+                }
+                .offset(y: -15)
+                .offset(x: 25)
+                
+                Spacer()
+                
+                // Recipes button
+                NavButton(icon: "fork.knife", isSelected: selectedTab == 1) {
+                    selectedTab = 1
+                }
+                .offset(y: -15)
+                .offset(x: 15)
+                
+                Spacer()
+                
+                // Plus/Close button
+                Button(action: {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                        isExpanded.toggle()
+                    }
+                }) {
+                    Circle()
+                        .fill(Color(red: 65/255, green: 72/255, blue: 41/255))
+                        .frame(width: 90, height: 90)
+                        .overlay(
+                            Image(systemName: isExpanded ? "xmark" : "plus")
+                                .font(.title2)
+                                .fontWeight(.semibold)
+                                .foregroundColor(.white)
+                                .rotationEffect(.degrees(isExpanded ? 90 : 0))
+                        )
+                }
+                .offset(y: -30)
             }
-            .offset(y: -15)
-            .offset(x: 25)
+            .padding(.horizontal, 40)
+            .padding(.top, 12)
+            .padding(.bottom, -40)
             
-            Spacer()
-            
-            // Recipes button
-            NavButton(icon: "fork.knife", isSelected: selectedTab == 1) {
-                selectedTab = 1
+            // Radial menu buttons (appear when expanded)
+            if isExpanded {
+                // Find Recipes button (higher up)
+                RadialMenuButton(
+                    icon: "magnifyingglass",
+                    label: "Find Recipes",
+                    color: Color(red: 65/255, green: 72/255, blue: 41/255)
+                ) {
+                    // 👈 LOGIC: Navigate to recipe search
+                    withAnimation {
+                        isExpanded = false
+                        selectedTab = 1 // Or trigger recipe search
+                    }
+                }
+                .offset(x: 65, y: -180)
+                .transition(.scale.combined(with: .opacity))
+                
+                // Update Fridge button (closer to plus button)
+                RadialMenuButton(
+                    icon: "camera.fill",
+                    label: "Update Fridge",
+                    color: Color(red: 65/255, green: 72/255, blue: 41/255)
+                ) {
+                    // 👈 LOGIC: Go to camera view
+                    withAnimation {
+                        isExpanded = false
+                        selectedTab = 0 // Navigate to home/camera
+                    }
+                }
+                .offset(x: 65, y: -100)
+                .transition(.scale.combined(with: .opacity))
             }
-            .offset(y: -15)
-            .offset(x: 15)
-            
-            Spacer()
-            
-            // Plus button
-            Button(action: { showAddSheet = true }) {
+        }
+        .background(Color.white)
+        .shadow(color: .black.opacity(0.1), radius: 8, y: -2)
+    }
+}
+
+// MARK: - Radial Menu Button
+
+struct RadialMenuButton: View {
+    let icon: String
+    let label: String
+    let color: Color
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 12) {
+                Text(label)
+                    .font(.caption)
+                    .fontWeight(.medium)
+                    .foregroundColor(.white)
+                
                 Circle()
-                    .fill(Color(red: 65/255, green: 72/255, blue: 41/255))
-                    .frame(width: 90, height: 90)
+                    .fill(color)
+                    .frame(width: 60, height: 60)
                     .overlay(
-                        Image(systemName: "plus")
-                            .font(.title2)
-                            .fontWeight(.semibold)
+                        Image(systemName: icon)
+                            .font(.title3)
                             .foregroundColor(.white)
                     )
             }
-            .offset(y: -30) // Makes it pop up a bit
         }
-        .padding(.horizontal, 40)
-        .padding(.top, 12)
-        .padding(.bottom, -20)
-        .background(Color.white)
-        .shadow(color: .black.opacity(0.1), radius: 8, y: -2)
     }
 }
 
@@ -150,6 +220,10 @@ enum NavigationDestination: Hashable {
     case recipeGeneration
 }
 
-#Preview {
-    ContentView()
+#if DEBUG
+struct ContentView_Previews: PreviewProvider {
+    static var previews: some View {
+        ContentView()
+    }
 }
+#endif
