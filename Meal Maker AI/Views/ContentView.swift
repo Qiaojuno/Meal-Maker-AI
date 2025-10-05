@@ -272,10 +272,14 @@ struct HomeTabView: View {
                             ingredients: ingredients,
                             onConfirm: { confirmedIngredients in
                                 identifiedIngredients = confirmedIngredients
-                                // Save ingredients but don't auto-navigate
+                                // Save ingredients
                                 StorageService.shared.saveIngredients(confirmedIngredients)
                                 // Go back to home
                                 navigationPath.removeLast()
+                                // Auto-generate recipes from scanned ingredients
+                                Task {
+                                    await viewModel.generateNewRecipes()
+                                }
                             },
                             onRescan: {
                                 navigationPath.removeLast()
